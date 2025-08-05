@@ -232,3 +232,10 @@ grafana_data/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# ========================================
+# Exceptions for EHB System
+# ========================================
+!backend/models/
+!backend/models/database/
+!backend/models/database/*.py
