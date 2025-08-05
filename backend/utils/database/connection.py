@@ -47,11 +47,8 @@ def create_tables():
     try:
         # Import all models
         from models.database.user import User
-        from models.database.service import Service, ServiceLog
-        from models.database.transaction import Transaction, Wallet, setup_relationships
-
-        # Setup relationships
-        setup_relationships()
+        from models.database.service import Service
+        from models.database.transaction import Transaction
 
         # Create tables
         Base.metadata.create_all(bind=engine)

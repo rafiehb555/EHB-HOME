@@ -28,25 +28,25 @@ def main():
     """Test all EHB services"""
     print("🧪 Testing EHB Services...")
     print("=" * 40)
-    
+
     services = [
         ("http://localhost:8000/health", "Backend API"),
         ("http://localhost:4001/health", "PSS Service"),
         ("http://localhost:4002/health", "EDR Service"),
         ("http://localhost:4003/health", "EMO Service"),
     ]
-    
+
     results = []
     for url, name in services:
         result = test_service(url, name)
         results.append(result)
-    
+
     print("\n📊 Summary:")
     print("-" * 20)
     running = sum(results)
     total = len(results)
     print(f"Running: {running}/{total} services")
-    
+
     if running == total:
         print("🎉 All services are running!")
     else:
@@ -58,4 +58,4 @@ def main():
         print("4. EDR: cd services/edr && python -m uvicorn main:app --host 0.0.0.0 --port 4002 --reload")
 
 if __name__ == "__main__":
-    main() 
+    main()
