@@ -251,7 +251,7 @@ export default function HomePage() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatsCard
                   title="Total Users"
-                  value={dashboardData.user_stats.total_users.toLocaleString()}
+                                      value={(dashboardData.user_stats?.total_users || 0).toLocaleString()}
                   icon={Users}
                 />
                 <StatsCard

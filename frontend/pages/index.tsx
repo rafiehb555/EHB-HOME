@@ -193,6 +193,9 @@ export default function EHBHomePage() {
                   <a href="/pss" className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">
                     PSS
                   </a>
+                  <a href="/emo" className="px-3 py-1 bg-purple-600 text-white rounded text-sm hover:bg-purple-700">
+                    EMO
+                  </a>
                 </div>
               ) : (
                 <div className="flex space-x-2">

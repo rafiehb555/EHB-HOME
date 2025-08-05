@@ -222,65 +222,75 @@ export default function Dashboard() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {dashboardData && (
+                {dashboardData ? (
                   <>
                     <MetricCard
                       title="Total Users"
-                      value={dashboardData.user_stats.total_users}
+                      value={dashboardData.user_stats?.total_users || 0}
                       icon={Users}
                       color="blue"
                     />
                     <MetricCard
                       title="Active Users"
-                      value={dashboardData.user_stats.active_users}
+                      value={dashboardData.user_stats?.active_users || 0}
                       icon={TrendingUp}
                       color="green"
                     />
                     <MetricCard
                       title="Daily Revenue"
-                      value={`$${dashboardData.revenue_stats.daily_revenue.toLocaleString()}`}
+                      value={`$${(dashboardData.revenue_stats?.daily_revenue || 0).toLocaleString()}`}
                       icon={Wallet}
                       color="purple"
                     />
                     <MetricCard
                       title="GoSellr Orders"
-                      value={dashboardData.service_stats.gosellr_orders}
+                      value={dashboardData.service_stats?.gosellr_orders || 0}
                       icon={ShoppingCart}
                       color="orange"
                     />
                   </>
+                ) : (
+                  <div className="col-span-4 text-center py-8">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading dashboard data...</p>
+                  </div>
                 )}
               </div>
             )}
 
             {/* System Health */}
             <ChartCard title="System Health">
-              {dashboardData && (
+              {dashboardData ? (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-gray-900">
-                      {dashboardData.system_metrics.cpu_usage}%
+                      {dashboardData.system_metrics?.cpu_usage || 0}%
                     </div>
                     <div className="text-sm text-gray-600">CPU</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-gray-900">
-                      {dashboardData.system_metrics.memory_usage}%
+                      {dashboardData.system_metrics?.memory_usage || 0}%
                     </div>
                     <div className="text-sm text-gray-600">Memory</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-gray-900">
-                      {dashboardData.system_metrics.disk_usage}%
+                      {dashboardData.system_metrics?.disk_usage || 0}%
                     </div>
                     <div className="text-sm text-gray-600">Disk</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-gray-900">
-                      {dashboardData.system_metrics.network_traffic} MB
+                      {dashboardData.system_metrics?.network_traffic || 0} MB
                     </div>
                     <div className="text-sm text-gray-600">Network</div>
                   </div>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                  <p className="text-gray-600">Loading system metrics...</p>
                 </div>
               )}
             </ChartCard>

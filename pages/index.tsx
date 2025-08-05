@@ -223,29 +223,34 @@ export default function HomePage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-              {dashboardData && (
+              {dashboardData ? (
                 <>
                   <StatsCard
                     title="Total Users"
-                    value={dashboardData.user_stats.total_users}
+                    value={dashboardData.user_stats?.total_users || 0}
                     icon={Users}
                   />
                   <StatsCard
                     title="Active Users"
-                    value={dashboardData.user_stats.active_users}
+                    value={dashboardData.user_stats?.active_users || 0}
                     icon={TrendingUp}
                   />
                   <StatsCard
                     title="Daily Revenue"
-                    value={`$${dashboardData.revenue_stats.daily_revenue.toLocaleString()}`}
+                    value={`$${(dashboardData.revenue_stats?.daily_revenue || 0).toLocaleString()}`}
                     icon={Wallet}
                   />
                   <StatsCard
                     title="GoSellr Orders"
-                    value={dashboardData.service_stats.gosellr_orders}
+                    value={dashboardData.service_stats?.gosellr_orders || 0}
                     icon={ShoppingCart}
                   />
                 </>
+              ) : (
+                <div className="col-span-4 text-center py-8">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                  <p className="text-gray-600">Loading dashboard data...</p>
+                </div>
               )}
             </div>
           )}
@@ -272,32 +277,37 @@ export default function HomePage() {
           {/* System Health */}
           <div className="bg-gray-50 rounded-lg p-6">
             <h3 className="text-xl font-bold text-gray-900 mb-4">System Health</h3>
-            {dashboardData && (
+            {dashboardData ? (
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-gray-900">
-                    {dashboardData.system_metrics.cpu_usage}%
+                    {dashboardData.system_metrics?.cpu_usage || 0}%
                   </div>
                   <div className="text-sm text-gray-600">CPU Usage</div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-gray-900">
-                    {dashboardData.system_metrics.memory_usage}%
+                    {dashboardData.system_metrics?.memory_usage || 0}%
                   </div>
                   <div className="text-sm text-gray-600">Memory Usage</div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-gray-900">
-                    {dashboardData.system_metrics.disk_usage}%
+                    {dashboardData.system_metrics?.disk_usage || 0}%
                   </div>
                   <div className="text-sm text-gray-600">Disk Usage</div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-gray-900">
-                    {dashboardData.system_metrics.network_traffic} MB
+                    {dashboardData.system_metrics?.network_traffic || 0} MB
                   </div>
                   <div className="text-sm text-gray-600">Network Traffic</div>
                 </div>
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                <p className="text-gray-600">Loading system metrics...</p>
               </div>
             )}
           </div>
