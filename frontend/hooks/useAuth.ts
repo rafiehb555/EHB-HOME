@@ -1,4 +1,4 @@
-import { useState, useEffect, createContext, useContext } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 
 interface User {
@@ -45,7 +45,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  // Check if user is logged in on mount
   useEffect(() => {
     checkAuth();
   }, []);
@@ -68,7 +67,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const userData = await response.json();
         setUser(userData);
       } else {
-        // Token is invalid, clear it
         localStorage.removeItem('token');
         localStorage.removeItem('user');
       }
@@ -83,13 +81,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      const formData = new FormData();
-      formData.append('username', email);
-      formData.append('password', password);
-
       const response = await fetch('http://localhost:8000/api/v1/auth/login', {
         method: 'POST',
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
       });
 
       if (response.ok) {
@@ -102,7 +99,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           is_admin: data.is_admin
         }));
 
-        // Get full user data
         await refreshUser();
         return true;
       } else {
@@ -135,7 +131,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           is_admin: data.is_admin
         }));
 
-        // Get full user data
         await refreshUser();
         return true;
       } else {

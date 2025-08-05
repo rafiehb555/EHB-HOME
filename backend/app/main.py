@@ -1,47 +1,36 @@
 """
 EHB Main Application
-FastAPI backend for EHB ecosystem
+FastAPI backend for EHB ecosystem with MongoDB
 """
 
 from fastapi import FastAPI, HTTPException, Depends, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from sqlalchemy.orm import Session
 from typing import List, Optional
-import os
-
-# Import models and database
-from models.base import get_db, SessionLocal
-from models.service import Service, ServiceType, ServiceStatus
-from models.user import User, UserLevel, UserStatus
-from models.transaction import Transaction
-from models.wallet import Wallet
-from models.franchise import Franchise
-from models.verification import Verification
-
-# Import Pydantic schemas
-from pydantic import BaseModel
 from datetime import datetime
-from typing import Optional, List
+from pydantic import BaseModel
+from contextlib import asynccontextmanager
+import uvicorn
+from dotenv import load_dotenv
 
-# Import database utilities
-from utils.database.connection import get_db, create_tables, test_connection
-from sqlalchemy.orm import Session
-
-# Import models
-from models.database.user import User
-from models.database.service import Service, ServiceLog
-from models.database.transaction import Transaction, Wallet
+# Import MongoDB utilities
+from utils.database.mongodb import (
+    connect_to_mongodb,
+    close_mongodb_connection,
+    initialize_database,
+    test_mongodb_connection,
+    get_services,
+    get_service,
+    get_user,
+    get_user_by_email,
+    create_user,
+    create_service,
+    get_transactions
+)
 
 # Import auth routes
 from api.v1.auth import router as auth_router
 from api.v1.services import router as services_router
-
-# Import contextlib and uvicorn
-from contextlib import asynccontextmanager
-import uvicorn
-from typing import Dict, Any
-from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -67,13 +56,13 @@ async def lifespan(app: FastAPI):
     # Startup
     print("🚀 Starting EHB Home Page & Dashboard...")
 
-    # Test database connection
-    if test_connection():
-        print("✅ Database connection successful")
-        # Create tables if they don't exist
-        create_tables()
+    # Test MongoDB connection
+    if await test_mongodb_connection():
+        print("✅ MongoDB connection successful")
+        # Initialize database with sample data
+        await initialize_database()
     else:
-        print("❌ Database connection failed")
+        print("❌ MongoDB connection failed")
 
     # Initialize services
     await initialize_services()
@@ -82,6 +71,7 @@ async def lifespan(app: FastAPI):
 
     # Shutdown
     print("🛑 Shutting down EHB Home Page & Dashboard...")
+    await close_mongodb_connection()
     await cleanup_services()
 
 
@@ -124,39 +114,48 @@ app.include_router(services_router, prefix="/api/v1")
 
 # Pydantic schemas
 class ServiceResponse(BaseModel):
-    id: int
+    id: str
     name: str
     description: str
-    service_type: str
+    type: str
     status: str
     version: str
-    price_per_month: float
-    usage_limit: int
-    endpoint_url: str
-    icon_url: str
+    port: int
+    host: str
+    endpoint: str
     documentation_url: str
-    created_at: datetime
-    updated_at: datetime
+    is_healthy: bool
+    response_time: int
+    error_count: int
+    created_at: str
 
     class Config:
         from_attributes = True
+
 
 class UserResponse(BaseModel):
-    id: int
+    id: str
     username: str
     email: str
+    full_name: str
     sql_level: str
+    sql_points: int
+    sql_rank: str
     status: str
     is_verified: bool
-    created_at: datetime
+    is_admin: bool
+    verification_progress: int
+    created_at: str
 
     class Config:
         from_attributes = True
+
 
 class SearchResponse(BaseModel):
     services: List[ServiceResponse]
     users: List[UserResponse]
     total_results: int
+
 
 class HealthResponse(BaseModel):
     status: str
@@ -164,325 +163,301 @@ class HealthResponse(BaseModel):
     services: dict
     database: str
 
-# Health check endpoint
+
 @app.get("/health", response_model=HealthResponse)
 async def health_check():
     """Health check endpoint"""
-    try:
-        # Test database connection
-        db = SessionLocal()
-        db.execute("SELECT 1")
-        db.close()
-        database_status = "connected"
-    except Exception:
-        database_status = "disconnected"
-
     return HealthResponse(
         status="healthy",
         timestamp=datetime.now(),
-        services={
-            "frontend": "running",
-            "backend": "running",
-            "database": database_status
-        },
-        database=database_status
+        services=app_state["services"],
+        database="MongoDB"
     )
 
-# Services endpoints
+
 @app.get("/api/services", response_model=List[ServiceResponse])
-async def get_services(
+async def get_services_endpoint(
     category: Optional[str] = Query(None, description="Filter by service category"),
-    status: Optional[str] = Query(None, description="Filter by service status"),
-    db: Session = Depends(get_db)
+    status: Optional[str] = Query(None, description="Filter by service status")
 ):
     """Get all services with optional filtering"""
-    query = db.query(Service)
+    try:
+        services = await get_services()
 
-    if category:
-        query = query.filter(Service.service_type == category)
+        # Apply filters
+        if category:
+            services = [s for s in services if s.get("type") == category]
+        if status:
+            services = [s for s in services if s.get("status") == status]
 
-    if status:
-        query = query.filter(Service.status == status)
+        # Convert to response format
+        response_services = []
+        for service in services:
+            response_services.append(ServiceResponse(
+                id=str(service["_id"]),
+                name=service["name"],
+                description=service["description"],
+                type=service["type"],
+                status=service["status"],
+                version=service["version"],
+                port=service["port"],
+                host=service["host"],
+                endpoint=service["endpoint"],
+                documentation_url=service["documentation_url"],
+                is_healthy=service["is_healthy"],
+                response_time=service["response_time"],
+                error_count=service["error_count"],
+                created_at=service["created_at"]
+            ))
 
-    services = query.all()
-    return services
+        return response_services
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
 
 @app.get("/api/services/{service_id}", response_model=ServiceResponse)
-async def get_service(service_id: int, db: Session = Depends(get_db)):
+async def get_service_endpoint(service_id: str):
     """Get a specific service by ID"""
-    service = db.query(Service).filter(Service.id == service_id).first()
+    service = await get_service(service_id)
     if not service:
         raise HTTPException(status_code=404, detail="Service not found")
-    return service
 
-@app.get("/api/services/featured", response_model=List[ServiceResponse])
-async def get_featured_services(db: Session = Depends(get_db)):
-    """Get featured services"""
-    services = db.query(Service).filter(Service.status == ServiceStatus.ACTIVE).limit(5).all()
-    return services
-
-# Search endpoint
-@app.get("/api/search", response_model=SearchResponse)
-async def search(
-    q: str = Query(..., description="Search query"),
-    db: Session = Depends(get_db)
-):
-    """Search for services and users"""
-    # Search services
-    services = db.query(Service).filter(
-        Service.name.ilike(f"%{q}%") |
-        Service.description.ilike(f"%{q}%")
-    ).limit(10).all()
-
-    # Search users
-    users = db.query(User).filter(
-        User.username.ilike(f"%{q}%") |
-        User.email.ilike(f"%{q}%")
-    ).limit(10).all()
-
-    total_results = len(services) + len(users)
-
-    return SearchResponse(
-        services=services,
-        users=users,
-        total_results=total_results
+    return ServiceResponse(
+        id=str(service["_id"]),
+        name=service["name"],
+        description=service["description"],
+        type=service["type"],
+        status=service["status"],
+        version=service["version"],
+        port=service["port"],
+        host=service["host"],
+        endpoint=service["endpoint"],
+        documentation_url=service["documentation_url"],
+        is_healthy=service["is_healthy"],
+        response_time=service["response_time"],
+        error_count=service["error_count"],
+        created_at=service["created_at"]
     )
 
-# User endpoints
+
+@app.get("/api/services/featured", response_model=List[ServiceResponse])
+async def get_featured_services_endpoint():
+    """Get featured services"""
+    try:
+        services = await get_services()
+        featured_services = [s for s in services if s.get("status") == "active"][:5]
+
+        response_services = []
+        for service in featured_services:
+            response_services.append(ServiceResponse(
+                id=str(service["_id"]),
+                name=service["name"],
+                description=service["description"],
+                type=service["type"],
+                status=service["status"],
+                version=service["version"],
+                port=service["port"],
+                host=service["host"],
+                endpoint=service["endpoint"],
+                documentation_url=service["documentation_url"],
+                is_healthy=service["is_healthy"],
+                response_time=service["response_time"],
+                error_count=service["error_count"],
+                created_at=service["created_at"]
+            ))
+
+        return response_services
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
+
+@app.get("/api/search", response_model=SearchResponse)
+async def search_endpoint(
+    q: str = Query(..., description="Search query")
+):
+    """Search services and users"""
+    try:
+        # Search services
+        services = await get_services()
+        matching_services = [
+            s for s in services
+            if q.lower() in s["name"].lower() or q.lower() in s["description"].lower()
+        ]
+
+        # Search users (simplified for now)
+        users = []  # TODO: Implement user search
+
+        # Convert services to response format
+        response_services = []
+        for service in matching_services:
+            response_services.append(ServiceResponse(
+                id=str(service["_id"]),
+                name=service["name"],
+                description=service["description"],
+                type=service["type"],
+                status=service["status"],
+                version=service["version"],
+                port=service["port"],
+                host=service["host"],
+                endpoint=service["endpoint"],
+                documentation_url=service["documentation_url"],
+                is_healthy=service["is_healthy"],
+                response_time=service["response_time"],
+                error_count=service["error_count"],
+                created_at=service["created_at"]
+            ))
+
+        return SearchResponse(
+            services=response_services,
+            users=[],  # TODO: Convert users to UserResponse
+            total_results=len(response_services) + len(users)
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Search error: {str(e)}")
+
+
 @app.get("/api/users", response_model=List[UserResponse])
-async def get_users(
+async def get_users_endpoint(
     sql_level: Optional[str] = Query(None, description="Filter by SQL level"),
-    status: Optional[str] = Query(None, description="Filter by user status"),
-    db: Session = Depends(get_db)
+    status: Optional[str] = Query(None, description="Filter by user status")
 ):
     """Get all users with optional filtering"""
-    query = db.query(User)
+    try:
+        # TODO: Implement user listing with filters
+        # For now, return empty list
+        return []
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
-    if sql_level:
-        query = query.filter(User.sql_level == sql_level)
-
-    if status:
-        query = query.filter(User.status == status)
-
-    users = query.all()
-    return users
 
 @app.get("/api/users/{user_id}", response_model=UserResponse)
-async def get_user(user_id: int, db: Session = Depends(get_db)):
+async def get_user_endpoint(user_id: str):
     """Get a specific user by ID"""
-    user = db.query(User).filter(User.id == user_id).first()
+    user = await get_user(user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    return user
 
-# Statistics endpoints
+    return UserResponse(
+        id=str(user["_id"]),
+        username=user["username"],
+        email=user["email"],
+        full_name=user["full_name"],
+        sql_level=user["sql_level"],
+        sql_points=user["sql_points"],
+        sql_rank=user["sql_rank"],
+        status=user["status"],
+        is_verified=user["is_verified"],
+        is_admin=user["is_admin"],
+        verification_progress=user["verification_progress"],
+        created_at=user["created_at"]
+    )
+
+
 @app.get("/api/stats/overview")
-async def get_overview_stats(db: Session = Depends(get_db)):
+async def get_overview_stats():
     """Get overview statistics"""
-    total_users = db.query(User).count()
-    total_services = db.query(Service).count()
-    total_transactions = db.query(Transaction).count()
-    total_wallets = db.query(Wallet).count()
+    try:
+        services = await get_services()
+        total_services = len(services)
+        active_services = len([s for s in services if s.get("status") == "active"])
 
-    active_services = db.query(Service).filter(Service.status == ServiceStatus.ACTIVE).count()
-    verified_users = db.query(User).filter(User.is_verified == True).count()
-
-    return {
-        "users": {
-            "total": total_users,
-            "verified": verified_users,
-            "active": total_users  # Simplified for now
-        },
-        "services": {
-            "total": total_services,
-            "active": active_services
-        },
-        "transactions": {
-            "total": total_transactions
-        },
-        "wallets": {
-            "total": total_wallets
+        return {
+            "total_users": 2,  # TODO: Get from database
+            "total_services": total_services,
+            "active_services": active_services,
+            "system_health": app_state["system_health"],
+            "active_users": app_state["active_users"]
         }
-    }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Stats error: {str(e)}")
 
-# Dashboard endpoints
+
 @app.get("/api/dashboard/services")
-async def get_services_dashboard(db: Session = Depends(get_db)):
-    """Get services dashboard data"""
-    services = db.query(Service).all()
-
-    service_stats = {}
-    for service in services:
-        service_stats[service.service_type.value] = {
-            "name": service.name,
-            "status": service.status.value,
-            "price": service.price_per_month,
-            "users": 0  # Placeholder for now
+async def get_services_dashboard():
+    """Get services for dashboard"""
+    try:
+        services = await get_services()
+        return {
+            "services": services,
+            "total_count": len(services),
+            "healthy_count": len([s for s in services if s.get("is_healthy")])
         }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Dashboard error: {str(e)}")
 
-    return {
-        "services": service_stats,
-        "total_services": len(services),
-        "active_services": len([s for s in services if s.status == ServiceStatus.ACTIVE])
-    }
 
-# Root endpoint
 @app.get("/")
 async def root():
     """Root endpoint"""
     return {
-        "message": "EHB API is running",
+        "message": "EHB Home Page & Dashboard API",
         "version": "1.0.0",
-        "docs": "/docs",
-        "health": "/health"
+        "status": "running",
+        "database": "MongoDB"
     }
 
-# API info endpoint
+
 @app.get("/api")
 async def api_info():
     """API information"""
     return {
-        "name": "EHB API",
+        "name": "EHB Home Page & Dashboard API",
         "version": "1.0.0",
-        "description": "EHB Home Page and Services API",
+        "description": "Complete EHB ecosystem with all services",
         "endpoints": {
             "health": "/health",
             "services": "/api/services",
             "users": "/api/users",
             "search": "/api/search",
-            "stats": "/api/stats/overview",
             "dashboard": "/api/dashboard/services"
         }
     }
 
-# New endpoints from new_code
-@app.get("/")
-async def root():
-    """Root endpoint with system overview"""
-    return {
-        "message": "EHB Home Page & Dashboard API",
-        "version": "1.0.0",
-        "status": "running",
-        "services_count": len(app_state["services"]),
-        "active_users": app_state["active_users"],
-        "system_health": app_state["system_health"]
-    }
-
-
-@app.get("/health")
-async def health_check():
-    """Health check endpoint"""
-    return {
-        "status": "healthy",
-        "database": "connected" if test_connection() else "disconnected",
-        "services": len(app_state["services"])
-    }
-
 
 @app.get("/api/sql/{user_id}")
-async def get_sql_level(user_id: int, db: Session = Depends(get_db)):
-    """Get user's SQL level"""
+async def get_sql_level_endpoint(user_id: str):
+    """Get SQL level for a user"""
     try:
-        user = db.query(User).filter(User.id == user_id).first()
-        if user:
-            return {
-                "user_id": user_id,
-                "sql_level": user.sql_level.value,
-                "sql_points": user.sql_points,
-                "sql_rank": user.sql_rank,
-                "verification_progress": user.verification_progress
-            }
-        else:
-            return {
-                "user_id": user_id,
-                "sql_level": "Basic",
-                "sql_points": 0,
-                "sql_rank": "New User",
-                "verification_progress": 0
-            }
-    except Exception as e:
+        user = await get_user(user_id)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
         return {
             "user_id": user_id,
-            "sql_level": "Basic",
-            "sql_points": 0,
-            "sql_rank": "New User",
-            "verification_progress": 0,
-            "error": str(e)
+            "sql_level": user["sql_level"],
+            "sql_points": user["sql_points"],
+            "sql_rank": user["sql_rank"],
+            "verification_progress": user["verification_progress"]
         }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"SQL level error: {str(e)}")
 
 
 @app.get("/api/services/status")
 async def get_services_status():
-    """Get status of all EHB services"""
-    return {
-        "services": app_state["services"],
-        "total_services": len(app_state["services"]),
-        "healthy_services": len([s for s in app_state["services"].values() if s["status"] == "ready"]),
-        "system_health": app_state["system_health"]
-    }
+    """Get status of all services"""
+    return app_state["services"]
 
 
 @app.get("/api/dashboard")
-async def get_dashboard_data(db: Session = Depends(get_db)):
+async def get_dashboard_data():
     """Get dashboard data"""
     try:
-        # Get user statistics
-        total_users = db.query(User).count()
-        active_users = db.query(User).filter(User.status.value == "active").count()
-
-        # Get service statistics
-        total_services = db.query(Service).count()
-        healthy_services = db.query(Service).filter(Service.is_healthy == True).count()
-
-        # Get transaction statistics
-        total_transactions = db.query(Transaction).count()
-        completed_transactions = db.query(Transaction).filter(Transaction.status.value == "completed").count()
+        services = await get_services()
+        total_services = len(services)
 
         return {
-            "users": {
-                "total": total_users,
-                "active": active_users,
-                "new_today": 45  # Mock data
+            "overview": {
+                "total_users": 2,  # TODO: Get from database
+                "total_services": total_services,
+                "active_users": app_state["active_users"]
             },
-            "services": {
-                "total": total_services,
-                "healthy": healthy_services,
-                "uptime": "99.9%"
-            },
-            "transactions": {
-                "total": total_transactions,
-                "completed": completed_transactions,
-                "revenue_today": 12500  # Mock data
-            },
-            "system": {
-                "health": "healthy",
-                "last_update": "2024-01-20T10:30:00Z"
-            }
+            "services": app_state["services"],
+            "system_health": app_state["system_health"]
         }
     except Exception as e:
-        # Return mock data if database fails
-        return {
-            "users": {
-                "total": 1250,
-                "active": 890,
-                "new_today": 45
-            },
-            "services": {
-                "total": 8,
-                "healthy": 7,
-                "uptime": "99.9%"
-            },
-            "transactions": {
-                "total": 156,
-                "completed": 142,
-                "revenue_today": 12500
-            },
-            "system": {
-                "health": "healthy",
-                "last_update": "2024-01-20T10:30:00Z"
-            }
-        }
+        raise HTTPException(status_code=500, detail=f"Dashboard data error: {str(e)}")
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run(app, host="0.0.0.0", port=8000)

@@ -1,0 +1,59 @@
+{
+  "timestamp": "2025-08-05T20:57:20.032334",
+  "services": [
+    {
+      "service": "Backend API",
+      "status": "\u274c Error",
+      "port": 8000,
+      "error": "HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)"
+    },
+    {
+      "service": "pss",
+      "status": "\u274c Not Running",
+      "port": 4001,
+      "error": "Connection refused"
+    },
+    {
+      "service": "emo",
+      "status": "\u274c Not Running",
+      "port": 4003,
+      "error": "Connection refused"
+    },
+    {
+      "service": "edr",
+      "status": "\u274c Not Running",
+      "port": 4002,
+      "error": "Connection refused"
+    },
+    {
+      "service": "jps",
+      "status": "\u274c Not Running",
+      "port": 4004,
+      "error": "Connection refused"
+    },
+    {
+      "service": "gosellr",
+      "status": "\u274c Not Running",
+      "port": 4005,
+      "error": "Connection refused"
+    },
+    {
+      "service": "wallet",
+      "status": "\u274c Not Running",
+      "port": 4006,
+      "error": "Connection refused"
+    },
+    {
+      "service": "ai-agent",
+      "status": "\u274c Not Running",
+      "port": 4007,
+      "error": "Connection refused"
+    },
+    {
+      "service": "ai-robot",
+      "status": "\u274c Not Running",
+      "port": 4008,
+      "error": "Connection refused"
+    }
+  ]
+}

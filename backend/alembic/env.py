@@ -17,13 +17,10 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 load_dotenv()
 
 # Import all models
-from models.base import Base
-from models.user import User
-from models.service import Service
-from models.transaction import Transaction
-from models.wallet import Wallet
-from models.franchise import Franchise
-from models.verification import Verification
+from models.database.connection import Base
+from models.database.user import User
+from models.database.service import Service, UserService
+from models.database.transaction import Transaction, Wallet
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
