@@ -25,7 +25,11 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
     // Log error to console but don't show to user if it's MetaMask related
     if (!error.message.includes('MetaMask') &&
         !error.message.includes('Failed to connect') &&
-        !error.message.includes('Metamask')) {
+        !error.message.includes('Metamask') &&
+        !error.message.includes('ethereum') &&
+        !error.message.includes('web3') &&
+        !error.message.includes('blockchain') &&
+        !error.message.includes('chrome-extension')) {
       console.error('Error caught by boundary:', error, errorInfo);
     }
   }
@@ -35,7 +39,11 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
       // Check if it's a MetaMask error
       if (this.state.error?.message.includes('MetaMask') ||
           this.state.error?.message.includes('Failed to connect') ||
-          this.state.error?.message.includes('Metamask')) {
+          this.state.error?.message.includes('Metamask') ||
+          this.state.error?.message.includes('ethereum') ||
+          this.state.error?.message.includes('web3') ||
+          this.state.error?.message.includes('blockchain') ||
+          this.state.error?.message.includes('chrome-extension')) {
         // Return children normally for MetaMask errors
         return this.props.children;
       }

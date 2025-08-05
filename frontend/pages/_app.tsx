@@ -25,9 +25,14 @@ export default function App({ Component, pageProps }: AppProps) {
           event.message.includes('Failed to connect') ||
           event.message.includes('Metamask') ||
           event.message.includes('Netallask') ||
+          event.message.includes('ethereum') ||
+          event.message.includes('web3') ||
+          event.message.includes('blockchain') ||
           event.filename?.includes('chrome-extension') ||
           event.filename?.includes('moz-extension') ||
-          event.filename?.includes('inpage.js')) {
+          event.filename?.includes('inpage.js') ||
+          event.filename?.includes('content-script') ||
+          event.filename?.includes('background-script')) {
         event.preventDefault();
         return false;
       }
@@ -37,10 +42,29 @@ export default function App({ Component, pageProps }: AppProps) {
       // Handle MetaMask connection rejections
       if (event.reason?.message?.includes('MetaMask') ||
           event.reason?.message?.includes('Failed to connect') ||
-          event.reason?.message?.includes('Metamask')) {
+          event.reason?.message?.includes('Metamask') ||
+          event.reason?.message?.includes('ethereum') ||
+          event.reason?.message?.includes('web3') ||
+          event.reason?.message?.includes('blockchain')) {
         event.preventDefault();
         return false;
       }
+    };
+
+    // Suppress console errors for MetaMask
+    const originalConsoleError = console.error;
+    console.error = (...args) => {
+      const message = args.join(' ');
+      if (message.includes('MetaMask') ||
+          message.includes('Failed to connect') ||
+          message.includes('Metamask') ||
+          message.includes('ethereum') ||
+          message.includes('web3') ||
+          message.includes('blockchain') ||
+          message.includes('chrome-extension')) {
+        return; // Don't log MetaMask errors
+      }
+      originalConsoleError.apply(console, args);
     };
 
     // Add error listeners
@@ -51,6 +75,7 @@ export default function App({ Component, pageProps }: AppProps) {
     return () => {
       window.removeEventListener('error', handleError);
       window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+      console.error = originalConsoleError;
     };
   }, []);
 

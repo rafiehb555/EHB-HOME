@@ -181,4 +181,4 @@ GET    /api/v1/compliance/status     # Get compliance status
 
 ---
 
-**🚀 Ready to start EMO service development!** 
+**🚀 Ready to start EMO service development!**
