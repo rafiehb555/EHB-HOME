@@ -1,0 +1,215 @@
+version: '3.8'
+
+services:
+  # Frontend Application
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - ehb-network
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://ehb_user:ehb_password@postgres:5432/ehb_database
+      - REDIS_URL=redis://redis:6379
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - ehb-network
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: ehb_database
+      POSTGRES_USER: ehb_user
+      POSTGRES_PASSWORD: ehb_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - ehb-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - ehb-network
+
+  # PSS Service (Personal Security System)
+  pss:
+    build:
+      context: ./services/pss
+      dockerfile: Dockerfile
+    ports:
+      - "4001:4001"
+    environment:
+      - DATABASE_URL=postgresql://ehb_user:ehb_password@postgres:5432/ehb_database
+    depends_on:
+      - postgres
+    networks:
+      - ehb-network
+
+  # EMO Service (Easy Management Office)
+  emo:
+    build:
+      context: ./services/emo
+      dockerfile: Dockerfile
+    ports:
+      - "4003:4003"
+    environment:
+      - DATABASE_URL=postgresql://ehb_user:ehb_password@postgres:5432/ehb_database
+    depends_on:
+      - postgres
+    networks:
+      - ehb-network
+
+  # EDR Service (Exam Decision Registration)
+  edr:
+    build:
+      context: ./services/edr
+      dockerfile: Dockerfile
+    ports:
+      - "4002:4002"
+    environment:
+      - DATABASE_URL=postgresql://ehb_user:ehb_password@postgres:5432/ehb_database
+    depends_on:
+      - postgres
+    networks:
+      - ehb-network
+
+  # JPS Service (Job Profile System)
+  jps:
+    build:
+      context: ./services/jps
+      dockerfile: Dockerfile
+    ports:
+      - "4005:4005"
+    environment:
+      - DATABASE_URL=postgresql://ehb_user:ehb_password@postgres:5432/ehb_database
+    depends_on:
+      - postgres
+    networks:
+      - ehb-network
+
+  # GoSellr Service (E-commerce)
+  gosellr:
+    build:
+      context: ./services/gosellr
+      dockerfile: Dockerfile
+    ports:
+      - "4004:4004"
+    environment:
+      - DATABASE_URL=postgresql://ehb_user:ehb_password@postgres:5432/ehb_database
+      - WALLET_URL=http://wallet:5001
+    depends_on:
+      - postgres
+      - wallet
+    networks:
+      - ehb-network
+
+  # Wallet Service
+  wallet:
+    build:
+      context: ./services/wallet
+      dockerfile: Dockerfile
+    ports:
+      - "5001:5001"
+    environment:
+      - DATABASE_URL=postgresql://ehb_user:ehb_password@postgres:5432/ehb_database
+      - ETHEREUM_RPC_URL=${ETHEREUM_RPC_URL}
+    depends_on:
+      - postgres
+    networks:
+      - ehb-network
+
+  # Franchise Service
+  franchise:
+    build:
+      context: ./services/franchise
+      dockerfile: Dockerfile
+    ports:
+      - "4006:4006"
+    environment:
+      - DATABASE_URL=postgresql://ehb_user:ehb_password@postgres:5432/ehb_database
+      - WALLET_URL=http://wallet:5001
+    depends_on:
+      - postgres
+      - wallet
+    networks:
+      - ehb-network
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - ehb-network
+
+  # Monitoring - Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    networks:
+      - ehb-network
+
+  # Monitoring - Grafana
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - ehb-network
+
+volumes:
+  postgres_data:
+  redis_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  ehb-network:
+    driver: bridge
