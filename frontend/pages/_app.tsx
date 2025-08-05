@@ -34,6 +34,7 @@ export default function App({ Component, pageProps }: AppProps) {
           event.filename?.includes('content-script') ||
           event.filename?.includes('background-script')) {
         event.preventDefault();
+        event.stopPropagation();
         return false;
       }
     };
@@ -47,6 +48,7 @@ export default function App({ Component, pageProps }: AppProps) {
           event.reason?.message?.includes('web3') ||
           event.reason?.message?.includes('blockchain')) {
         event.preventDefault();
+        event.stopPropagation();
         return false;
       }
     };
@@ -67,15 +69,35 @@ export default function App({ Component, pageProps }: AppProps) {
       originalConsoleError.apply(console, args);
     };
 
+    // Suppress unhandled runtime errors for MetaMask
+    const originalOnError = window.onerror;
+    window.onerror = (message, source, lineno, colno, error) => {
+      const messageStr = String(message);
+      if (messageStr.includes('MetaMask') ||
+          messageStr.includes('Failed to connect') ||
+          messageStr.includes('Metamask') ||
+          messageStr.includes('ethereum') ||
+          messageStr.includes('web3') ||
+          messageStr.includes('blockchain') ||
+          source?.includes('chrome-extension')) {
+        return true; // Prevent error from showing
+      }
+      if (originalOnError) {
+        return originalOnError(message, source, lineno, colno, error);
+      }
+      return false;
+    };
+
     // Add error listeners
-    window.addEventListener('error', handleError);
+    window.addEventListener('error', handleError, true);
     window.addEventListener('unhandledrejection', handleUnhandledRejection);
 
     // Cleanup
     return () => {
-      window.removeEventListener('error', handleError);
+      window.removeEventListener('error', handleError, true);
       window.removeEventListener('unhandledrejection', handleUnhandledRejection);
       console.error = originalConsoleError;
+      window.onerror = originalOnError;
     };
   }, []);
 

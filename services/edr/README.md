@@ -187,4 +187,4 @@ GET    /api/v1/progress/analytics  # Get analytics
 
 ---
 
-**🚀 Ready to start EDR service development!** 
+**🚀 Ready to start EDR service development!**
