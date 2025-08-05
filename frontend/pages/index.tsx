@@ -187,6 +187,12 @@ export default function EHBHomePage() {
                   <a href="/dashboard" className="px-3 py-1 bg-indigo-600 text-white rounded text-sm hover:bg-indigo-700">
                     Dashboard
                   </a>
+                  <a href="/sql-system" className="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700">
+                    SQL System
+                  </a>
+                  <a href="/pss" className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">
+                    PSS
+                  </a>
                 </div>
               ) : (
                 <div className="flex space-x-2">
