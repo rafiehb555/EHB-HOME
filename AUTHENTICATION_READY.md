@@ -9,12 +9,14 @@ The EHB authentication system is now **fully functional** with JWT tokens, secur
 ## 📋 **What's Been Completed**
 
 ### ✅ **Database Setup**
+
 - **PostgreSQL Database**: Running in Docker container
 - **Database Models**: User, Service, Transaction, Wallet
 - **Initial Data**: Default services and admin user
 - **Connection**: Properly configured with environment variables
 
 ### ✅ **Backend Authentication**
+
 - **JWT Service** (`backend/services/auth/jwt.py`)
   - Access and refresh token creation
   - Token verification and validation
@@ -36,6 +38,7 @@ The EHB authentication system is now **fully functional** with JWT tokens, secur
   - `/auth/logout` - User logout
 
 ### ✅ **Frontend Authentication**
+
 - **Auth Hook** (`frontend/hooks/useAuth.ts`)
   - Complete authentication context
   - Token management and storage
@@ -48,23 +51,27 @@ The EHB authentication system is now **fully functional** with JWT tokens, secur
 ## 🚀 **How to Use**
 
 ### **1. Start the Database**
+
 ```bash
 # Database is already running in Docker
 docker ps | findstr postgres-ehb
 ```
 
 ### **2. Start the Backend**
+
 ```bash
 cd backend
 python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 ### **3. Start the Frontend**
+
 ```bash
 npm run dev
 ```
 
 ### **4. Access the System**
+
 - **Frontend**: http://localhost:3000
 - **Backend API**: http://localhost:8000
 - **API Documentation**: http://localhost:8000/docs
@@ -72,6 +79,7 @@ npm run dev
 ---
 
 ## 🔑 **Default Admin Account**
+
 - **Email**: admin@ehb.com
 - **Username**: admin
 - **Password**: admin_hash (needs to be properly hashed)
@@ -81,6 +89,7 @@ npm run dev
 ## 📊 **API Endpoints**
 
 ### **Authentication**
+
 ```
 POST /auth/register     - Register new user
 POST /auth/login        - Login user
@@ -92,6 +101,7 @@ POST /auth/logout       - Logout user
 ```
 
 ### **Protected Routes**
+
 - All routes requiring authentication use JWT Bearer tokens
 - Automatic token refresh on 401 errors
 - Role-based access control (admin routes)
@@ -101,18 +111,21 @@ POST /auth/logout       - Logout user
 ## 🛡️ **Security Features**
 
 ### **Password Security**
+
 - ✅ bcrypt hashing
 - ✅ Password strength validation
 - ✅ Minimum 8 characters
 - ✅ Uppercase, lowercase, digit required
 
 ### **Token Security**
+
 - ✅ JWT access tokens (30 minutes)
 - ✅ JWT refresh tokens (7 days)
 - ✅ Automatic token refresh
 - ✅ Secure token storage
 
 ### **Input Validation**
+
 - ✅ Email format validation
 - ✅ Username format validation
 - ✅ SQL injection protection
@@ -123,6 +136,7 @@ POST /auth/logout       - Logout user
 ## 🎯 **Next Steps**
 
 ### **🔥 HIGH PRIORITY**
+
 1. **Individual Service Development**
    - PSS Service (Port 4001) - KYC verification
    - EMO Service (Port 4003) - Business verification
@@ -136,6 +150,7 @@ POST /auth/logout       - Logout user
    - Protected routes
 
 ### **🟡 MEDIUM PRIORITY**
+
 3. **Testing & Quality Assurance**
    - Unit tests for auth system
    - Integration tests
@@ -149,6 +164,7 @@ POST /auth/logout       - Logout user
 ---
 
 ## 📁 **File Structure**
+
 ```
 backend/
 ├── models/database/
