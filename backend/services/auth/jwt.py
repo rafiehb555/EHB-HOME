@@ -1,68 +1,118 @@
-from jose import JWTError, jwt
 from datetime import datetime, timedelta
 from typing import Optional, Union
-from fastapi import HTTPException, status
+from jose import JWTError, jwt
+from passlib.context import CryptContext
 import os
 from dotenv import load_dotenv
 
-# Load environment variables
-load_dotenv(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'config.env'))
+load_dotenv()
 
-# JWT Configuration
-SECRET_KEY = os.getenv("SECRET_KEY", "your-super-secret-key-change-this-in-production")
+# Configuration
+SECRET_KEY = os.getenv("SECRET_KEY", "ehb-super-secret-key-change-this-in-production")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
+REFRESH_TOKEN_EXPIRE_DAYS = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "7"))
 
-# Token data structure
-class TokenData:
-    def __init__(self, user_id: int, email: str, is_admin: bool = False):
-        self.user_id = user_id
-        self.email = email
-        self.is_admin = is_admin
+# Password hashing
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verify a password against its hash"""
+    return pwd_context.verify(plain_password, hashed_password)
+
+
+def get_password_hash(password: str) -> str:
+    """Hash a password"""
+    return pwd_context.hash(password)
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
-    """Create JWT access token"""
+    """Create an access token"""
     to_encode = data.copy()
-
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
         expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
 
-    to_encode.update({"exp": expire})
+    to_encode.update({"exp": expire, "type": "access"})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
 
-def verify_token(token: str) -> Optional[TokenData]:
-    """Verify JWT token and return user data"""
+def create_refresh_token(data: dict) -> str:
+    """Create a refresh token"""
+    to_encode = data.copy()
+    expire = datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+
+    to_encode.update({"exp": expire, "type": "refresh"})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+
+def verify_token(token: str) -> Optional[dict]:
+    """Verify and decode a token"""
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id: int = payload.get("user_id")
-        email: str = payload.get("email")
-        is_admin: bool = payload.get("is_admin", False)
-
-        if user_id is None or email is None:
-            return None
-
-        return TokenData(user_id=user_id, email=email, is_admin=is_admin)
-
+        return payload
     except JWTError:
         return None
 
 
-def create_user_token(user_id: int, email: str, is_admin: bool = False) -> str:
-    """Create token for user"""
+def is_token_expired(token: str) -> bool:
+    """Check if a token is expired"""
+    payload = verify_token(token)
+    if not payload:
+        return True
+
+    exp = payload.get("exp")
+    if not exp:
+        return True
+
+    return datetime.utcnow() > datetime.fromtimestamp(exp)
+
+
+def get_token_type(token: str) -> Optional[str]:
+    """Get the type of token (access or refresh)"""
+    payload = verify_token(token)
+    if not payload:
+        return None
+
+    return payload.get("type")
+
+
+def create_tokens(user_id: int, username: str, email: str, is_admin: bool = False) -> dict:
+    """Create both access and refresh tokens for a user"""
     data = {
-        "user_id": user_id,
+        "sub": str(user_id),
+        "username": username,
         "email": email,
-        "is_admin": is_admin,
-        "sub": email
+        "is_admin": is_admin
     }
+
+    access_token = create_access_token(data)
+    refresh_token = create_refresh_token(data)
+
+    return {
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer",
+        "expires_in": ACCESS_TOKEN_EXPIRE_MINUTES * 60
+    }
+
+
+def refresh_access_token(refresh_token: str) -> Optional[str]:
+    """Create a new access token using a refresh token"""
+    payload = verify_token(refresh_token)
+    if not payload or payload.get("type") != "refresh":
+        return None
+
+    # Create new access token with same user data
+    data = {
+        "sub": payload.get("sub"),
+        "username": payload.get("username"),
+        "email": payload.get("email"),
+        "is_admin": payload.get("is_admin", False)
+    }
+
     return create_access_token(data)
-
-
-def get_token_expiration() -> datetime:
-    """Get token expiration time"""
-    return datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)

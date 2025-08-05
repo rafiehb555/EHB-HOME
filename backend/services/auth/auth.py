@@ -1,87 +1,153 @@
-from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
-from passlib.context import CryptContext
+from fastapi import HTTPException, status, Depends
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from typing import Optional
 import re
 
-from utils.database.connection import get_db
+from models.database.connection import get_db
 from models.database.user import User
-from .jwt import verify_token, create_user_token
+from .jwt import verify_token, get_password_hash, verify_password, create_tokens
 
-# Password hashing
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-# OAuth2 scheme
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+# Security scheme
+security = HTTPBearer()
 
 
-def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verify password against hash"""
-    return pwd_context.verify(plain_password, hashed_password)
+class AuthService:
+    def __init__(self):
+        pass
+
+    def authenticate_user(self, db: Session, email: str, password: str) -> Optional[User]:
+        """Authenticate a user with email and password"""
+        user = db.query(User).filter(User.email == email).first()
+        if not user:
+            return None
+
+        if not verify_password(password, user.password_hash):
+            return None
+
+        return user
+
+    def get_user_by_email(self, db: Session, email: str) -> Optional[User]:
+        """Get user by email"""
+        return db.query(User).filter(User.email == email).first()
+
+    def get_user_by_username(self, db: Session, username: str) -> Optional[User]:
+        """Get user by username"""
+        return db.query(User).filter(User.username == username).first()
+
+    def create_user(self, db: Session, user_data: dict) -> User:
+        """Create a new user"""
+        # Hash the password
+        user_data["password_hash"] = get_password_hash(user_data.pop("password"))
+
+        # Create user
+        user = User(**user_data)
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+
+        return user
+
+    def update_user(self, db: Session, user_id: int, user_data: dict) -> Optional[User]:
+        """Update user information"""
+        user = db.query(User).filter(User.id == user_id).first()
+        if not user:
+            return None
+
+        # Update fields
+        for field, value in user_data.items():
+            if hasattr(user, field):
+                setattr(user, field, value)
+
+        db.commit()
+        db.refresh(user)
+        return user
+
+    def change_password(self, db: Session, user_id: int, old_password: str, new_password: str) -> bool:
+        """Change user password"""
+        user = db.query(User).filter(User.id == user_id).first()
+        if not user:
+            return False
+
+        # Verify old password
+        if not verify_password(old_password, user.password_hash):
+            return False
+
+        # Hash new password
+        user.password_hash = get_password_hash(new_password)
+        db.commit()
+
+        return True
+
+    def validate_email(self, email: str) -> bool:
+        """Validate email format"""
+        pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        return re.match(pattern, email) is not None
+
+    def validate_password(self, password: str) -> bool:
+        """Validate password strength"""
+        if len(password) < 8:
+            return False
+
+        # Check for at least one uppercase, one lowercase, one digit
+        if not re.search(r'[A-Z]', password):
+            return False
+        if not re.search(r'[a-z]', password):
+            return False
+        if not re.search(r'\d', password):
+            return False
+
+        return True
+
+    def validate_username(self, username: str) -> bool:
+        """Validate username format"""
+        # Username should be 3-20 characters, alphanumeric and underscore only
+        pattern = r'^[a-zA-Z0-9_]{3,20}$'
+        return re.match(pattern, username) is not None
 
 
-def get_password_hash(password: str) -> str:
-    """Hash password"""
-    return pwd_context.hash(password)
-
-
-def validate_email(email: str) -> bool:
-    """Validate email format"""
-    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-    return re.match(pattern, email) is not None
-
-
-def validate_password(password: str) -> bool:
-    """Validate password strength"""
-    # At least 8 characters, 1 uppercase, 1 lowercase, 1 digit
-    if len(password) < 8:
-        return False
-    if not re.search(r'[A-Z]', password):
-        return False
-    if not re.search(r'[a-z]', password):
-        return False
-    if not re.search(r'\d', password):
-        return False
-    return True
-
-
-def authenticate_user(db: Session, email: str, password: str) -> Optional[User]:
-    """Authenticate user with email and password"""
-    user = db.query(User).filter(User.email == email).first()
-    if not user:
-        return None
-    if not verify_password(password, user.hashed_password):
-        return None
-    return user
-
-
+# Dependency functions
 def get_current_user(
-    db: Session = Depends(get_db),
-    token: str = Depends(oauth2_scheme)
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    db: Session = Depends(get_db)
 ) -> User:
-    """Get current user from token"""
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
+    """Get current authenticated user"""
+    token = credentials.credentials
+    payload = verify_token(token)
 
-    token_data = verify_token(token)
-    if token_data is None:
-        raise credentials_exception
+    if payload is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
-    user = db.query(User).filter(User.id == token_data.user_id).first()
+    user_id = payload.get("sub")
+    if user_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    user = db.query(User).filter(User.id == int(user_id)).first()
     if user is None:
-        raise credentials_exception
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
     return user
 
 
 def get_current_active_user(current_user: User = Depends(get_current_user)) -> User:
     """Get current active user"""
-    if current_user.status.value != "active":
-        raise HTTPException(status_code=400, detail="Inactive user")
+    if not current_user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Inactive user"
+        )
     return current_user
 
 
@@ -95,50 +161,5 @@ def get_current_admin_user(current_user: User = Depends(get_current_user)) -> Us
     return current_user
 
 
-def create_user(
-    db: Session,
-    email: str,
-    password: str,
-    full_name: str,
-    username: str
-) -> User:
-    """Create new user"""
-    # Validate email
-    if not validate_email(email):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid email format"
-        )
-
-    # Validate password
-    if not validate_password(password):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Password must be at least 8 characters with uppercase, lowercase, and digit"
-        )
-
-    # Check if user exists
-    existing_user = db.query(User).filter(
-        (User.email == email) | (User.username == username)
-    ).first()
-
-    if existing_user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email or username already registered"
-        )
-
-    # Create user
-    hashed_password = get_password_hash(password)
-    db_user = User(
-        email=email,
-        username=username,
-        full_name=full_name,
-        hashed_password=hashed_password
-    )
-
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
-
-    return db_user
+# Create auth service instance
+auth_service = AuthService()
