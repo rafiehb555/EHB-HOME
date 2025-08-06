@@ -1,16 +1,28 @@
-"""
-Franchise Model for EHB System
-"""
-
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, Enum, Float, ForeignKey
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Boolean,
+    DateTime,
+    Text,
+    Enum,
+    Float,
+    ForeignKey,
+)
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 import enum
 from .base import Base
 
 
+"""
+Franchise Model for EHB System
+"""
+
+
 class FranchiseStatus(enum.Enum):
     """Franchise status"""
+
     PENDING = "pending"
     APPROVED = "approved"
     REJECTED = "rejected"
@@ -21,6 +33,7 @@ class FranchiseStatus(enum.Enum):
 
 class FranchiseType(enum.Enum):
     """Franchise types"""
+
     RETAIL = "retail"
     SERVICE = "service"
     FOOD = "food"
@@ -31,6 +44,7 @@ class FranchiseType(enum.Enum):
 
 class Franchise(Base):
     """Franchise model for EHB system"""
+
     __tablename__ = "franchises"
 
     id = Column(Integer, primary_key=True, index=True)

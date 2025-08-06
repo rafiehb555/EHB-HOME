@@ -1,15 +1,8 @@
-"""
-Database Setup Script for EHB System
-"""
-
 import os
 import sys
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
-
-# Add the parent directory to the path
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 from models.base import Base, engine, SessionLocal
 from models.user import User
@@ -18,6 +11,14 @@ from models.transaction import Transaction
 from models.wallet import Wallet
 from models.franchise import Franchise
 from models.verification import Verification
+
+
+"""
+Database Setup Script for EHB System
+"""
+
+# Add the parent directory to the path
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 load_dotenv()
 
@@ -52,7 +53,7 @@ def insert_initial_data():
                 "usage_limit": 1000,
                 "endpoint_url": "http://pss:4001",
                 "icon_url": "/static/icons/pss.png",
-                "documentation_url": "https://docs.ehb.com/pss"
+                "documentation_url": "https://docs.ehb.com/pss",
             },
             {
                 "name": "Easy Management Office",
@@ -64,7 +65,7 @@ def insert_initial_data():
                 "usage_limit": 2000,
                 "endpoint_url": "http://emo:4003",
                 "icon_url": "/static/icons/emo.png",
-                "documentation_url": "https://docs.ehb.com/emo"
+                "documentation_url": "https://docs.ehb.com/emo",
             },
             {
                 "name": "Exam Decision Registration",
@@ -76,7 +77,7 @@ def insert_initial_data():
                 "usage_limit": 1500,
                 "endpoint_url": "http://edr:4002",
                 "icon_url": "/static/icons/edr.png",
-                "documentation_url": "https://docs.ehb.com/edr"
+                "documentation_url": "https://docs.ehb.com/edr",
             },
             {
                 "name": "Job Profile System",
@@ -88,7 +89,7 @@ def insert_initial_data():
                 "usage_limit": 1000,
                 "endpoint_url": "http://jps:4005",
                 "icon_url": "/static/icons/jps.png",
-                "documentation_url": "https://docs.ehb.com/jps"
+                "documentation_url": "https://docs.ehb.com/jps",
             },
             {
                 "name": "GoSellr E-commerce",
@@ -100,7 +101,7 @@ def insert_initial_data():
                 "usage_limit": 5000,
                 "endpoint_url": "http://gosellr:4004",
                 "icon_url": "/static/icons/gosellr.png",
-                "documentation_url": "https://docs.ehb.com/gosellr"
+                "documentation_url": "https://docs.ehb.com/gosellr",
             },
             {
                 "name": "EHB Wallet",
@@ -112,7 +113,7 @@ def insert_initial_data():
                 "usage_limit": 10000,
                 "endpoint_url": "http://wallet:5001",
                 "icon_url": "/static/icons/wallet.png",
-                "documentation_url": "https://docs.ehb.com/wallet"
+                "documentation_url": "https://docs.ehb.com/wallet",
             },
             {
                 "name": "Franchise Management",
@@ -124,7 +125,7 @@ def insert_initial_data():
                 "usage_limit": 500,
                 "endpoint_url": "http://franchise:4006",
                 "icon_url": "/static/icons/franchise.png",
-                "documentation_url": "https://docs.ehb.com/franchise"
+                "documentation_url": "https://docs.ehb.com/franchise",
             },
             {
                 "name": "AI Marketplace",
@@ -136,7 +137,7 @@ def insert_initial_data():
                 "usage_limit": 3000,
                 "endpoint_url": "http://ai-marketplace:4007",
                 "icon_url": "/static/icons/ai-marketplace.png",
-                "documentation_url": "https://docs.ehb.com/ai-marketplace"
+                "documentation_url": "https://docs.ehb.com/ai-marketplace",
             },
             {
                 "name": "AI Agent",
@@ -148,7 +149,7 @@ def insert_initial_data():
                 "usage_limit": 2000,
                 "endpoint_url": "http://ai-agent:4008",
                 "icon_url": "/static/icons/ai-agent.png",
-                "documentation_url": "https://docs.ehb.com/ai-agent"
+                "documentation_url": "https://docs.ehb.com/ai-agent",
             },
             {
                 "name": "AI Robot",
@@ -160,15 +161,17 @@ def insert_initial_data():
                 "usage_limit": 1000,
                 "endpoint_url": "http://ai-robot:4009",
                 "icon_url": "/static/icons/ai-robot.png",
-                "documentation_url": "https://docs.ehb.com/ai-robot"
-            }
+                "documentation_url": "https://docs.ehb.com/ai-robot",
+            },
         ]
 
         for service_data in services_data:
             # Check if service already exists
-            existing_service = db.query(Service).filter(
-                Service.service_type == service_data["service_type"]
-            ).first()
+            existing_service = (
+                db.query(Service)
+                .filter(Service.service_type == service_data["service_type"])
+                .first()
+            )
 
             if not existing_service:
                 service = Service(**service_data)
@@ -195,7 +198,9 @@ def create_database_views():
     try:
         with engine.connect() as conn:
             # User statistics view
-            conn.execute(text("""
+            conn.execute(
+                text(
+                    """
                 CREATE OR REPLACE VIEW user_statistics AS
                 SELECT
                     COUNT(*) as total_users,
@@ -204,10 +209,14 @@ def create_database_views():
                     COUNT(CASE WHEN sql_level = 'vip' THEN 1 END) as vip_users,
                     COUNT(CASE WHEN created_at >= CURRENT_DATE - INTERVAL '30 days' THEN 1 END) as new_users_30_days
                 FROM users
-            """))
+            """
+                )
+            )
 
             # Transaction statistics view
-            conn.execute(text("""
+            conn.execute(
+                text(
+                    """
                 CREATE OR REPLACE VIEW transaction_statistics AS
                 SELECT
                     COUNT(*) as total_transactions,
@@ -216,7 +225,9 @@ def create_database_views():
                     COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending_transactions,
                     COALESCE(AVG(amount), 0) as average_transaction_amount
                 FROM transactions
-            """))
+            """
+                )
+            )
 
             conn.commit()
             print("✅ Database views created successfully")

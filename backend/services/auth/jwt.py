@@ -5,6 +5,7 @@ from passlib.context import CryptContext
 import os
 from dotenv import load_dotenv
 
+
 load_dotenv()
 
 # Configuration
@@ -81,13 +82,15 @@ def get_token_type(token: str) -> Optional[str]:
     return payload.get("type")
 
 
-def create_tokens(user_id: int, username: str, email: str, is_admin: bool = False) -> dict:
+def create_tokens(
+    user_id: int, username: str, email: str, is_admin: bool = False
+) -> dict:
     """Create both access and refresh tokens for a user"""
     data = {
         "sub": str(user_id),
         "username": username,
         "email": email,
-        "is_admin": is_admin
+        "is_admin": is_admin,
     }
 
     access_token = create_access_token(data)
@@ -97,7 +100,7 @@ def create_tokens(user_id: int, username: str, email: str, is_admin: bool = Fals
         "access_token": access_token,
         "refresh_token": refresh_token,
         "token_type": "bearer",
-        "expires_in": ACCESS_TOKEN_EXPIRE_MINUTES * 60
+        "expires_in": ACCESS_TOKEN_EXPIRE_MINUTES * 60,
     }
 
 
@@ -112,7 +115,7 @@ def refresh_access_token(refresh_token: str) -> Optional[str]:
         "sub": payload.get("sub"),
         "username": payload.get("username"),
         "email": payload.get("email"),
-        "is_admin": payload.get("is_admin", False)
+        "is_admin": payload.get("is_admin", False),
     }
 
     return create_access_token(data)

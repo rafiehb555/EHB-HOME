@@ -9,6 +9,7 @@ from services.auth.auth import auth_service, get_current_user, get_current_activ
 from services.auth.jwt import create_tokens, refresh_access_token
 from models.database.user import User
 
+
 router = APIRouter(prefix="/auth", tags=["authentication"])
 security = HTTPBearer()
 
@@ -68,37 +69,34 @@ def register(user_data: UserRegister, db: Session = Depends(get_db)):
     # Validate email
     if not auth_service.validate_email(user_data.email):
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid email format"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid email format"
         )
 
     # Validate username
     if not auth_service.validate_username(user_data.username):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Username must be 3-20 characters, alphanumeric and underscore only"
+            detail="Username must be 3-20 characters, alphanumeric and underscore only",
         )
 
     # Validate password
     if not auth_service.validate_password(user_data.password):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Password must be at least 8 characters with uppercase, lowercase, and digit"
+            detail="Password must be at least 8 characters with uppercase, lowercase, and digit",
         )
 
     # Check if user exists
     existing_user = auth_service.get_user_by_email(db, user_data.email)
     if existing_user:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email already registered"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered"
         )
 
     existing_username = auth_service.get_user_by_username(db, user_data.username)
     if existing_username:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Username already taken"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Username already taken"
         )
 
     # Create user
@@ -110,7 +108,7 @@ def register(user_data: UserRegister, db: Session = Depends(get_db)):
             user_id=user.id,
             username=user.username,
             email=user.email,
-            is_admin=user.is_admin
+            is_admin=user.is_admin,
         )
 
         return tokens
@@ -118,7 +116,7 @@ def register(user_data: UserRegister, db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error creating user"
+            detail="Error creating user",
         )
 
 
@@ -136,8 +134,7 @@ def login(user_data: UserLogin, db: Session = Depends(get_db)):
 
     if not user.is_active:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Account is deactivated"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Account is deactivated"
         )
 
     # Create tokens
@@ -145,7 +142,7 @@ def login(user_data: UserLogin, db: Session = Depends(get_db)):
         user_id=user.id,
         username=user.username,
         email=user.email,
-        is_admin=user.is_admin
+        is_admin=user.is_admin,
     )
 
     return tokens
@@ -167,7 +164,7 @@ def refresh_token(refresh_token: str):
         "access_token": new_access_token,
         "refresh_token": refresh_token,
         "token_type": "bearer",
-        "expires_in": 1800  # 30 minutes
+        "expires_in": 1800,  # 30 minutes
     }
 
 
@@ -181,7 +178,7 @@ def get_current_user_info(current_user: User = Depends(get_current_active_user))
 def update_user_info(
     user_data: dict,
     current_user: User = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Update current user information"""
     # Remove sensitive fields
@@ -193,8 +190,7 @@ def update_user_info(
 
     if not updated_user:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
         )
 
     return updated_user
@@ -204,14 +200,14 @@ def update_user_info(
 def change_password(
     password_data: PasswordChange,
     current_user: User = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Change user password"""
     # Validate new password
     if not auth_service.validate_password(password_data.new_password):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Password must be at least 8 characters with uppercase, lowercase, and digit"
+            detail="Password must be at least 8 characters with uppercase, lowercase, and digit",
         )
 
     success = auth_service.change_password(
@@ -220,8 +216,7 @@ def change_password(
 
     if not success:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Incorrect old password"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect old password"
         )
 
     return {"message": "Password changed successfully"}

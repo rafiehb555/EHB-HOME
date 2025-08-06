@@ -1,17 +1,8 @@
-#!/usr/bin/env python3
-"""
-Simple EHB Database Setup
-Works with existing PostgreSQL instance
-"""
-
 import os
 import sys
 import psycopg2
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
-
-# Add the parent directory to the path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from models.base import Base, engine, SessionLocal
 from models.user import User
@@ -22,21 +13,57 @@ from models.franchise import Franchise
 from models.verification import Verification
 
 
+#!/usr/bin/env python3
+"""
+Simple EHB Database Setup
+Works with existing PostgreSQL instance
+"""
+
+# Add the parent directory to the path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+
 def test_postgresql_connection():
     """Test different PostgreSQL connection methods"""
     print("🔍 Testing PostgreSQL connections...")
 
     # Common connection configurations
     configs = [
-        {"host": "localhost", "port": "5433", "database": "ehb_database", "user": "ehb_user", "password": "postgres"},
-        {"host": "localhost", "port": "5433", "database": "postgres", "user": "ehb_user", "password": "postgres"},
-        {"host": "localhost", "port": "5432", "database": "postgres", "user": "postgres", "password": ""},
-        {"host": "localhost", "port": "5432", "database": "postgres", "user": "postgres", "password": "postgres"},
+        {
+            "host": "localhost",
+            "port": "5433",
+            "database": "ehb_database",
+            "user": "ehb_user",
+            "password": "postgres",
+        },
+        {
+            "host": "localhost",
+            "port": "5433",
+            "database": "postgres",
+            "user": "ehb_user",
+            "password": "postgres",
+        },
+        {
+            "host": "localhost",
+            "port": "5432",
+            "database": "postgres",
+            "user": "postgres",
+            "password": "",
+        },
+        {
+            "host": "localhost",
+            "port": "5432",
+            "database": "postgres",
+            "user": "postgres",
+            "password": "postgres",
+        },
     ]
 
     for i, config in enumerate(configs, 1):
         try:
-            print(f"  Testing config {i}: {config['user']}@{config['host']}:{config['port']}")
+            print(
+                f"  Testing config {i}: {config['user']}@{config['host']}:{config['port']}"
+            )
             conn = psycopg2.connect(**config)
             conn.close()
             print(f"✅ Success with config {i}!")
@@ -90,7 +117,7 @@ def insert_initial_data():
                 "usage_limit": 1000,
                 "endpoint_url": "http://pss:4001",
                 "icon_url": "/static/icons/pss.png",
-                "documentation_url": "https://docs.ehb.com/pss"
+                "documentation_url": "https://docs.ehb.com/pss",
             },
             {
                 "name": "Easy Management Office",
@@ -102,7 +129,7 @@ def insert_initial_data():
                 "usage_limit": 2000,
                 "endpoint_url": "http://emo:4003",
                 "icon_url": "/static/icons/emo.png",
-                "documentation_url": "https://docs.ehb.com/emo"
+                "documentation_url": "https://docs.ehb.com/emo",
             },
             {
                 "name": "Exam Decision Registration",
@@ -114,7 +141,7 @@ def insert_initial_data():
                 "usage_limit": 1500,
                 "endpoint_url": "http://edr:4002",
                 "icon_url": "/static/icons/edr.png",
-                "documentation_url": "https://docs.ehb.com/edr"
+                "documentation_url": "https://docs.ehb.com/edr",
             },
             {
                 "name": "Job Profile System",
@@ -126,7 +153,7 @@ def insert_initial_data():
                 "usage_limit": 1000,
                 "endpoint_url": "http://jps:4005",
                 "icon_url": "/static/icons/jps.png",
-                "documentation_url": "https://docs.ehb.com/jps"
+                "documentation_url": "https://docs.ehb.com/jps",
             },
             {
                 "name": "GoSellr E-commerce",
@@ -138,8 +165,8 @@ def insert_initial_data():
                 "usage_limit": 5000,
                 "endpoint_url": "http://gosellr:4004",
                 "icon_url": "/static/icons/gosellr.png",
-                "documentation_url": "https://docs.ehb.com/gosellr"
-            }
+                "documentation_url": "https://docs.ehb.com/gosellr",
+            },
         ]
 
         for service_data in services_data:
@@ -193,7 +220,9 @@ def main():
         print("❌ Cannot proceed without PostgreSQL connection")
         print("\n💡 Try one of these solutions:")
         print("1. Install PostgreSQL locally")
-        print("2. Use Docker: docker run -d --name postgres -e POSTGRES_PASSWORD=postgres -p 5432:5432 postgres:15")
+        print(
+            "2. Use Docker: docker run -d --name postgres -e POSTGRES_PASSWORD=postgres -p 5432:5432 postgres:15"
+        )
         print("3. Check if PostgreSQL is running on a different port")
         return False
 

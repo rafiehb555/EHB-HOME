@@ -1,19 +1,19 @@
-"""
-Database Configuration for EHB System
-"""
-
 import os
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 
+
+"""
+Database Configuration for EHB System
+"""
+
 load_dotenv()
 
 # Database URL - using Docker PostgreSQL container
 DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql://ehb_user:postgres@localhost:5433/ehb_database"
+    "DATABASE_URL", "postgresql://ehb_user:postgres@localhost:5433/ehb_database"
 )
 
 # Create SQLAlchemy engine
@@ -21,7 +21,7 @@ engine = create_engine(
     DATABASE_URL,
     echo=False,  # Set to True for SQL debugging
     pool_pre_ping=True,
-    pool_recycle=300
+    pool_recycle=300,
 )
 
 # Create SessionLocal class

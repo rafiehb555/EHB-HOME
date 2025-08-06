@@ -1,12 +1,13 @@
+import sys
+import importlib
+from typing import List, Tuple
+
+
 #!/usr/bin/env python3
 """
 EHB Dependencies Verification Script
 Tests all installed dependencies for the EHB project
 """
-
-import sys
-import importlib
-from typing import List, Tuple
 
 
 def test_import(module_name: str, package_name: str = None) -> Tuple[bool, str]:
@@ -16,7 +17,10 @@ def test_import(module_name: str, package_name: str = None) -> Tuple[bool, str]:
             module = importlib.import_module(package_name)
         else:
             module = importlib.import_module(module_name)
-        return True, f"✅ {module_name} ({getattr(module, '__version__', 'unknown version')})"
+        return (
+            True,
+            f"✅ {module_name} ({getattr(module, '__version__', 'unknown version')})",
+        )
     except ImportError as e:
         return False, f"❌ {module_name} - {str(e)}"
     except Exception as e:

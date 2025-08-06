@@ -8,6 +8,7 @@ from models.database.connection import get_db
 from models.database.user import User
 from .jwt import verify_token, get_password_hash, verify_password, create_tokens
 
+
 # Security scheme
 security = HTTPBearer()
 
@@ -16,7 +17,9 @@ class AuthService:
     def __init__(self):
         pass
 
-    def authenticate_user(self, db: Session, email: str, password: str) -> Optional[User]:
+    def authenticate_user(
+        self, db: Session, email: str, password: str
+    ) -> Optional[User]:
         """Authenticate a user with email and password"""
         user = db.query(User).filter(User.email == email).first()
         if not user:
@@ -63,7 +66,9 @@ class AuthService:
         db.refresh(user)
         return user
 
-    def change_password(self, db: Session, user_id: int, old_password: str, new_password: str) -> bool:
+    def change_password(
+        self, db: Session, user_id: int, old_password: str, new_password: str
+    ) -> bool:
         """Change user password"""
         user = db.query(User).filter(User.id == user_id).first()
         if not user:
@@ -81,7 +86,7 @@ class AuthService:
 
     def validate_email(self, email: str) -> bool:
         """Validate email format"""
-        pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
         return re.match(pattern, email) is not None
 
     def validate_password(self, password: str) -> bool:
@@ -90,11 +95,11 @@ class AuthService:
             return False
 
         # Check for at least one uppercase, one lowercase, one digit
-        if not re.search(r'[A-Z]', password):
+        if not re.search(r"[A-Z]", password):
             return False
-        if not re.search(r'[a-z]', password):
+        if not re.search(r"[a-z]", password):
             return False
-        if not re.search(r'\d', password):
+        if not re.search(r"\d", password):
             return False
 
         return True
@@ -102,14 +107,14 @@ class AuthService:
     def validate_username(self, username: str) -> bool:
         """Validate username format"""
         # Username should be 3-20 characters, alphanumeric and underscore only
-        pattern = r'^[a-zA-Z0-9_]{3,20}$'
+        pattern = r"^[a-zA-Z0-9_]{3,20}$"
         return re.match(pattern, username) is not None
 
 
 # Dependency functions
 def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ) -> User:
     """Get current authenticated user"""
     token = credentials.credentials
@@ -145,8 +150,7 @@ def get_current_active_user(current_user: User = Depends(get_current_user)) -> U
     """Get current active user"""
     if not current_user.is_active:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Inactive user"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user"
         )
     return current_user
 
@@ -155,8 +159,7 @@ def get_current_admin_user(current_user: User = Depends(get_current_user)) -> Us
     """Get current admin user"""
     if not current_user.is_admin:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not enough permissions"
+            status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions"
         )
     return current_user
 

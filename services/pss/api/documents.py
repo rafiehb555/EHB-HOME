@@ -1,230 +1,232 @@
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
-from sqlalchemy.orm import Session
-from typing import List, Optional
 import os
 import uuid
 from datetime import datetime
+from typing import List, Optional
+
+from config import settings
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from models.kyc_document import (
+from services.document_service import DocumentService
+from sqlalchemy.orm import Session
 
 from backend.models.database.connection import get_db
 from backend.services.auth.auth import get_current_user
-from backend.models.database.user import User
-from models.kyc_document import (
-    KYCDocument, DocumentType, DocumentStatus,
-    DocumentUploadRequest, DocumentResponse, DocumentUpdateRequest
+
+                import json
+
+
+
+    DocumentResponse,
+    DocumentStatus,
+    DocumentType,
+    DocumentUpdateRequest,
+    DocumentUploadRequest,
+    KYCDocument,
 )
-from services.document_service import DocumentService
-from config import settings
-
-router = APIRouter(prefix="/documents", tags=["documents"])
-
-# Initialize document service
-document_service = DocumentService()
+router = APIRouter()
 
 
-@router.post("/upload", response_model=DocumentResponse)
+@router.post("/documents/upload", response_model=DocumentResponse)
 async def upload_document(
-    file: UploadFile = File(...),
     document_type: DocumentType = Form(...),
-    document_number: Optional[str] = Form(None),
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    file: UploadFile = File(...),
+    metadata: Optional[str] = Form(None),
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
 ):
     """Upload a KYC document"""
     try:
-        # Validate file
-        if not document_service.validate_file(file):
+        # Validate file type
+        if not file.filename.lower().endswith(tuple(settings.ALLOWED_EXTENSIONS)):
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid file type or size"
+                status_code=400,
+                detail="Invalid file type. Allowed: " + ", ".join(settings.ALLOWED_EXTENSIONS)
             )
 
-        # Save document
-        document = await document_service.save_document(
-            db=db,
+        # Create unique filename
+        file_extension = os.path.splitext(file.filename)[1]
+        unique_filename = f"{uuid.uuid4()}{file_extension}"
+        file_path = os.path.join(settings.UPLOAD_DIR, unique_filename)
+
+        # Save file
+        with open(file_path, "wb") as buffer:
+            content = await file.read()
+            buffer.write(content)
+
+        # Parse metadata
+        metadata_dict = {}
+        if metadata:
+            try:
+                metadata_dict = json.loads(metadata)
+            except:
+                metadata_dict = {"original_filename": file.filename}
+        else:
+            metadata_dict = {"original_filename": file.filename}
+
+        # Create document record
+        document_service = DocumentService(db)
+        document = document_service.create_document(
             user_id=current_user.id,
-            file=file,
             document_type=document_type,
-            document_number=document_number
+            file_path=file_path,
+            metadata=metadata_dict
         )
 
         return DocumentResponse.from_orm(document)
 
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Document upload failed: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
 
 
-@router.get("/", response_model=List[DocumentResponse])
-async def get_user_documents(
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+@router.get("/documents/{document_id}", response_model=DocumentResponse)
+async def get_document(
+    document_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
 ):
-    """Get all documents for current user"""
-    documents = document_service.get_user_documents(db, current_user.id)
+    """Get document by ID"""
+    document_service = DocumentService(db)
+    document = document_service.get_document(document_id)
+
+    if not document:
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    # Check if user has access to this document
+    if document.user_id != current_user.id and not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    return DocumentResponse.from_orm(document)
+
+
+@router.get("/documents/user/{user_id}", response_model=List[DocumentResponse])
+async def get_user_documents(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    """Get all documents for a user"""
+    # Check if user has access
+    if user_id != current_user.id and not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    document_service = DocumentService(db)
+    documents = document_service.get_user_documents(user_id)
+
     return [DocumentResponse.from_orm(doc) for doc in documents]
 
 
-@router.get("/{document_id}", response_model=DocumentResponse)
-async def get_document(
+@router.put("/documents/{document_id}/status", response_model=DocumentResponse)
+async def update_document_status(
     document_id: int,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    status: DocumentStatus,
+    admin_notes: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
 ):
-    """Get specific document"""
-    document = document_service.get_document(db, document_id, current_user.id)
+    """Update document status (admin only)"""
+    if not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+    document_service = DocumentService(db)
+    document = document_service.update_document_status(document_id, status, admin_notes)
 
     if not document:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Document not found"
-        )
+        raise HTTPException(status_code=404, detail="Document not found")
 
     return DocumentResponse.from_orm(document)
 
 
-@router.put("/{document_id}", response_model=DocumentResponse)
-async def update_document(
+@router.post("/documents/{document_id}/process")
+async def process_document(
     document_id: int,
-    update_data: DocumentUpdateRequest,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
 ):
-    """Update document information"""
-    document = document_service.update_document(
-        db, document_id, current_user.id, update_data.dict()
-    )
+    """Process document for OCR and validation"""
+    document_service = DocumentService(db)
+    result = document_service.process_document(document_id)
 
-    if not document:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Document not found"
-        )
+    if "error" in result:
+        raise HTTPException(status_code=400, detail=result["error"])
 
-    return DocumentResponse.from_orm(document)
+    return result
 
 
-@router.delete("/{document_id}")
+@router.post("/documents/{document_id}/validate")
+async def validate_document(
+    document_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    """Validate document against external databases"""
+    document_service = DocumentService(db)
+    result = document_service.validate_document(document_id)
+
+    if "error" in result:
+        raise HTTPException(status_code=400, detail=result["error"])
+
+    return result
+
+
+@router.get("/documents/statistics")
+async def get_document_statistics(
+    user_id: Optional[int] = None,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    """Get document processing statistics"""
+    # Check if user has access
+    if user_id and user_id != current_user.id and not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    document_service = DocumentService(db)
+    stats = document_service.get_document_statistics(user_id)
+
+    return stats
+
+
+@router.delete("/documents/{document_id}")
 async def delete_document(
     document_id: int,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
 ):
-    """Delete document"""
-    success = document_service.delete_document(db, document_id, current_user.id)
+    """Delete a document"""
+    document_service = DocumentService(db)
+    document = document_service.get_document(document_id)
+
+    if not document:
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    # Check if user has access
+    if document.user_id != current_user.id and not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    success = document_service.delete_document(document_id)
 
     if not success:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Document not found"
-        )
+        raise HTTPException(status_code=500, detail="Failed to delete document")
 
     return {"message": "Document deleted successfully"}
 
 
-@router.post("/{document_id}/process")
-async def process_document(
-    document_id: int,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    """Process document with OCR"""
-    try:
-        result = await document_service.process_document(db, document_id, current_user.id)
-        return {
-            "message": "Document processing started",
-            "document_id": document_id,
-            "status": "processing"
-        }
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Document processing failed: {str(e)}"
-        )
-
-
-@router.get("/{document_id}/ocr")
-async def get_document_ocr(
-    document_id: int,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    """Get OCR results for document"""
-    ocr_data = document_service.get_document_ocr(db, document_id, current_user.id)
-
-    if not ocr_data:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="OCR data not found"
-        )
-
-    return ocr_data
-
-
-# Admin endpoints
-@router.get("/admin/all", response_model=List[DocumentResponse])
+@router.get("/documents/admin/all", response_model=List[DocumentResponse])
 async def get_all_documents(
+    skip: int = 0,
+    limit: int = 100,
     status: Optional[DocumentStatus] = None,
-    document_type: Optional[DocumentType] = None,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
 ):
     """Get all documents (admin only)"""
     if not current_user.is_admin:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Admin access required"
-        )
+        raise HTTPException(status_code=403, detail="Admin access required")
 
-    documents = document_service.get_all_documents(db, status, document_type)
+    query = db.query(KYCDocument)
+
+    if status:
+        query = query.filter(KYCDocument.status == status)
+
+    documents = query.offset(skip).limit(limit).all()
+
     return [DocumentResponse.from_orm(doc) for doc in documents]
-
-
-@router.put("/admin/{document_id}/approve")
-async def approve_document(
-    document_id: int,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    """Approve document (admin only)"""
-    if not current_user.is_admin:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Admin access required"
-        )
-
-    success = document_service.approve_document(db, document_id, current_user.id)
-
-    if not success:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Document not found"
-        )
-
-    return {"message": "Document approved successfully"}
-
-
-@router.put("/admin/{document_id}/reject")
-async def reject_document(
-    document_id: int,
-    reason: str,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    """Reject document (admin only)"""
-    if not current_user.is_admin:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Admin access required"
-        )
-
-    success = document_service.reject_document(db, document_id, reason, current_user.id)
-
-    if not success:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Document not found"
-        )
-
-    return {"message": "Document rejected successfully"}

@@ -1,11 +1,22 @@
+import asyncio
+import os
+from dotenv import load_dotenv
+
+        import boto3
+        import openai
+        import stripe
+        import sendgrid
+        import twilio
+        from google.cloud import storage
+        from google.cloud import vision
+        import json
+
+
+
 #!/usr/bin/env python3
 """
 Quick test to verify API integrations are working
 """
-
-import asyncio
-import os
-from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
@@ -32,43 +43,36 @@ async def test_basic_functionality():
     print("\n2. Import Tests:")
 
     try:
-        import boto3
         print("   ✅ AWS SDK (boto3)")
     except ImportError:
         print("   ❌ AWS SDK (boto3)")
 
     try:
-        import openai
         print("   ✅ OpenAI")
     except ImportError:
         print("   ❌ OpenAI")
 
     try:
-        import stripe
         print("   ✅ Stripe")
     except ImportError:
         print("   ❌ Stripe")
 
     try:
-        import sendgrid
         print("   ✅ SendGrid")
     except ImportError:
         print("   ❌ SendGrid")
 
     try:
-        import twilio
         print("   ✅ Twilio")
     except ImportError:
         print("   ❌ Twilio")
 
     try:
-        from google.cloud import storage
         print("   ✅ Google Cloud Storage")
     except ImportError:
         print("   ❌ Google Cloud Storage")
 
     try:
-        from google.cloud import vision
         print("   ✅ Google Cloud Vision")
     except ImportError:
         print("   ❌ Google Cloud Vision")
@@ -115,7 +119,6 @@ async def test_basic_functionality():
     print("\n5. Frontend Dependencies:")
 
     try:
-        import json
         with open('package.json', 'r') as f:
             package_data = json.load(f)
 

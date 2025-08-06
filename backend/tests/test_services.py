@@ -5,11 +5,12 @@ import httpx
 
 from app.main import app
 
+
 client = TestClient(app)
 
 
 class TestServiceIntegration:
-    @patch('httpx.AsyncClient.get')
+    @patch("httpx.AsyncClient.get")
     def test_pss_service_health(self, mock_get):
         """Test PSS service health check"""
         mock_response = MagicMock()
@@ -20,7 +21,7 @@ class TestServiceIntegration:
         response = client.get("/api/v1/services/pss/health")
         assert response.status_code == 200
 
-    @patch('httpx.AsyncClient.get')
+    @patch("httpx.AsyncClient.get")
     def test_emo_service_health(self, mock_get):
         """Test EMO service health check"""
         mock_response = MagicMock()
@@ -31,7 +32,7 @@ class TestServiceIntegration:
         response = client.get("/api/v1/services/emo/health")
         assert response.status_code == 200
 
-    @patch('httpx.AsyncClient.get')
+    @patch("httpx.AsyncClient.get")
     def test_edr_service_health(self, mock_get):
         """Test EDR service health check"""
         mock_response = MagicMock()
@@ -64,7 +65,16 @@ class TestServiceIntegration:
 
         # Check if expected services are present
         service_names = [service["name"] for service in data["services"]]
-        expected_services = ["pss", "emo", "edr", "jps", "gosellr", "wallet", "ai-agent", "ai-robot"]
+        expected_services = [
+            "pss",
+            "emo",
+            "edr",
+            "jps",
+            "gosellr",
+            "wallet",
+            "ai-agent",
+            "ai-robot",
+        ]
 
         for expected_service in expected_services:
             assert expected_service in service_names
@@ -74,7 +84,7 @@ class TestServiceIntegration:
         response = client.get("/api/v1/services/invalid-service/health")
         assert response.status_code == 404
 
-    @patch('httpx.AsyncClient.get')
+    @patch("httpx.AsyncClient.get")
     def test_get_service_profile(self, mock_get):
         """Test getting service profile"""
         mock_response = MagicMock()
@@ -82,12 +92,12 @@ class TestServiceIntegration:
         mock_response.json.return_value = {
             "user_id": 1,
             "verification_status": "verified",
-            "security_score": 95
+            "security_score": 95,
         }
         mock_get.return_value = mock_response
 
         # Mock authentication
-        with patch('api.v1.services.get_current_user') as mock_auth:
+        with patch("api.v1.services.get_current_user") as mock_auth:
             mock_user = MagicMock()
             mock_user.id = 1
             mock_auth.return_value = mock_user
@@ -95,7 +105,7 @@ class TestServiceIntegration:
             response = client.get("/api/v1/services/pss/profile/1")
             assert response.status_code == 200
 
-    @patch('httpx.AsyncClient.post')
+    @patch("httpx.AsyncClient.post")
     def test_verify_with_service(self, mock_post):
         """Test verification with service"""
         mock_response = MagicMock()
@@ -103,12 +113,12 @@ class TestServiceIntegration:
         mock_response.json.return_value = {
             "verification_id": "TEST_001",
             "status": "verified",
-            "score": 95
+            "score": 95,
         }
         mock_post.return_value = mock_response
 
         # Mock authentication
-        with patch('api.v1.services.get_current_user') as mock_auth:
+        with patch("api.v1.services.get_current_user") as mock_auth:
             mock_user = MagicMock()
             mock_user.id = 1
             mock_auth.return_value = mock_user
@@ -116,38 +126,42 @@ class TestServiceIntegration:
             verification_data = {
                 "document_type": "id_card",
                 "document_data": "test_data",
-                "verification_method": "document_upload"
+                "verification_method": "document_upload",
             }
 
-            response = client.post("/api/v1/services/pss/verify", json=verification_data)
+            response = client.post(
+                "/api/v1/services/pss/verify", json=verification_data
+            )
             assert response.status_code == 200
 
     def test_verify_with_invalid_service(self):
         """Test verification with invalid service"""
         # Mock authentication
-        with patch('api.v1.services.get_current_user') as mock_auth:
+        with patch("api.v1.services.get_current_user") as mock_auth:
             mock_user = MagicMock()
             mock_user.id = 1
             mock_auth.return_value = mock_user
 
             verification_data = {"test": "data"}
 
-            response = client.post("/api/v1/services/invalid-service/verify", json=verification_data)
+            response = client.post(
+                "/api/v1/services/invalid-service/verify", json=verification_data
+            )
             assert response.status_code == 404
 
-    @patch('httpx.AsyncClient.get')
+    @patch("httpx.AsyncClient.get")
     def test_get_user_verification_status(self, mock_get):
         """Test getting user verification status"""
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {
             "verification_status": "verified",
-            "score": 95
+            "score": 95,
         }
         mock_get.return_value = mock_response
 
         # Mock authentication
-        with patch('api.v1.services.get_current_user') as mock_auth:
+        with patch("api.v1.services.get_current_user") as mock_auth:
             mock_user = MagicMock()
             mock_user.id = 1
             mock_auth.return_value = mock_user

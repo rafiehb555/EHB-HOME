@@ -1,9 +1,3 @@
-#!/usr/bin/env python3
-"""
-Initialize Default Data Script
-Creates admin user and default services
-"""
-
 import sys
 import os
 from datetime import datetime
@@ -15,6 +9,16 @@ from models.database.transaction import Transaction, TransactionType, Transactio
 from models.database.transaction import Wallet
 from services.auth.jwt import get_password_hash
 
+
+        from utils.database.connection import test_connection
+
+
+
+#!/usr/bin/env python3
+"""
+Initialize Default Data Script
+Creates admin user and default services
+"""
 
 def create_admin_user():
     """Create default admin user"""
@@ -207,7 +211,6 @@ def main():
     try:
         # Test database connection
         print("🔍 Testing database connection...")
-        from utils.database.connection import test_connection
         if not test_connection():
             print("❌ Database connection failed")
             return False

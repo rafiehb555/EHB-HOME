@@ -1,6 +1,7 @@
 import os
-from pydantic_settings import BaseSettings
 from typing import Optional
+
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
@@ -14,7 +15,7 @@ class Settings(BaseSettings):
     PORT: int = 4003
 
     # Database Configuration
-    DATABASE_URL: str = "postgresql://postgres:ehb_password@localhost:5432/ehb_database"
+    DATABASE_URL: str = "postgresql://ehb_user:ehb_password@localhost:5432/ehb_database"
 
     # JWT Configuration
     SECRET_KEY: str = "ehb-emo-secret-key-change-in-production"
@@ -24,7 +25,16 @@ class Settings(BaseSettings):
     # File Upload Configuration
     UPLOAD_DIR: str = "uploads"
     MAX_FILE_SIZE: int = 20 * 1024 * 1024  # 20MB
-    ALLOWED_EXTENSIONS: list = [".jpg", ".jpeg", ".png", ".pdf", ".doc", ".docx", ".xls", ".xlsx"]
+    ALLOWED_EXTENSIONS: list = [
+        ".jpg",
+        ".jpeg",
+        ".png",
+        ".pdf",
+        ".doc",
+        ".docx",
+        ".xls",
+        ".xlsx",
+    ]
 
     # Business Registry APIs
     BUSINESS_REGISTRY_API: Optional[str] = None
@@ -61,6 +71,8 @@ settings = Settings()
 
 
 # Ensure upload directory exists
+
+
 def ensure_upload_dir():
     """Ensure upload directory exists"""
     os.makedirs(settings.UPLOAD_DIR, exist_ok=True)

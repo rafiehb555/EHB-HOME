@@ -1,16 +1,27 @@
-"""
-Verification Model for EHB System
-"""
-
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, Enum, ForeignKey
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Boolean,
+    DateTime,
+    Text,
+    Enum,
+    ForeignKey,
+)
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 import enum
 from .base import Base
 
 
+"""
+Verification Model for EHB System
+"""
+
+
 class VerificationType(enum.Enum):
     """Verification types"""
+
     PSS = "pss"
     EMO = "emo"
     EDR = "edr"
@@ -22,6 +33,7 @@ class VerificationType(enum.Enum):
 
 class VerificationStatus(enum.Enum):
     """Verification status"""
+
     PENDING = "pending"
     IN_PROGRESS = "in_progress"
     APPROVED = "approved"
@@ -31,6 +43,7 @@ class VerificationStatus(enum.Enum):
 
 class Verification(Base):
     """Verification model for EHB system"""
+
     __tablename__ = "verifications"
 
     id = Column(Integer, primary_key=True, index=True)

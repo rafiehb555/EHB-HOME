@@ -1,19 +1,29 @@
+import sys
+import os
+from datetime import datetime
+
+        from utils.database.connection import test_connection, engine
+        from sqlalchemy import text
+
+            from utils.database.connection import create_tables
+        from app.main import app
+        from api.v1.auth import router as auth_router
+        from api.v1.services import router as services_router
+        import os
+        from dotenv import load_dotenv
+
+
+
+
 #!/usr/bin/env python3
 """
 Database Status Check Script
 Tests all database components and connections
 """
 
-import sys
-import os
-from datetime import datetime
-
 def test_database_connection():
     """Test database connection"""
     try:
-        from utils.database.connection import test_connection, engine
-        from sqlalchemy import text
-
         print("🔍 Testing database connection...")
 
         # Test basic connection
@@ -25,7 +35,6 @@ def test_database_connection():
 
         # Test table creation
         try:
-            from utils.database.connection import create_tables
             create_tables()
             print("✅ Database tables created successfully")
         except Exception as e:
@@ -70,15 +79,12 @@ def test_backend_app():
     try:
         print("\n🔍 Testing backend application...")
 
-        from app.main import app
         print("✅ Backend app imported successfully")
 
         # Test auth endpoints
-        from api.v1.auth import router as auth_router
         print("✅ Auth router imported successfully")
 
         # Test services endpoints
-        from api.v1.services import router as services_router
         print("✅ Services router imported successfully")
 
         print("✅ Backend application components working")
@@ -92,9 +98,6 @@ def test_environment():
     """Test environment configuration"""
     try:
         print("\n🔍 Testing environment configuration...")
-
-        import os
-        from dotenv import load_dotenv
 
         # Load environment
         load_dotenv("../config.env")

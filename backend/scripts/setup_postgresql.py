@@ -1,17 +1,18 @@
-"""
-PostgreSQL Setup Script for EHB System
-"""
-
 import os
 import sys
 import subprocess
 import time
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+
+"""
+PostgreSQL Setup Script for EHB System
+"""
+
 # Add the parent directory to the path
 sys.path.append(str(Path(__file__).parent.parent))
-
-from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -19,8 +20,7 @@ load_dotenv()
 def check_postgresql_installation():
     """Check if PostgreSQL is installed"""
     try:
-        result = subprocess.run(['psql', '--version'],
-                              capture_output=True, text=True)
+        result = subprocess.run(["psql", "--version"], capture_output=True, text=True)
         if result.returncode == 0:
             print("✅ PostgreSQL is installed")
             return True
@@ -44,8 +44,11 @@ def create_database_and_user():
     try:
         # Create user
         create_user_cmd = [
-            'psql', '-U', 'postgres', '-c',
-            f"CREATE USER {db_user} WITH PASSWORD '{db_password}';"
+            "psql",
+            "-U",
+            "postgres",
+            "-c",
+            f"CREATE USER {db_user} WITH PASSWORD '{db_password}';",
         ]
 
         result = subprocess.run(create_user_cmd, capture_output=True, text=True)
@@ -56,8 +59,11 @@ def create_database_and_user():
 
         # Create database
         create_db_cmd = [
-            'psql', '-U', 'postgres', '-c',
-            f"CREATE DATABASE {db_name} OWNER {db_user};"
+            "psql",
+            "-U",
+            "postgres",
+            "-c",
+            f"CREATE DATABASE {db_name} OWNER {db_user};",
         ]
 
         result = subprocess.run(create_db_cmd, capture_output=True, text=True)
@@ -68,8 +74,13 @@ def create_database_and_user():
 
         # Grant privileges
         grant_cmd = [
-            'psql', '-U', 'postgres', '-d', db_name, '-c',
-            f"GRANT ALL PRIVILEGES ON DATABASE {db_name} TO {db_user};"
+            "psql",
+            "-U",
+            "postgres",
+            "-d",
+            db_name,
+            "-c",
+            f"GRANT ALL PRIVILEGES ON DATABASE {db_name} TO {db_user};",
         ]
 
         result = subprocess.run(grant_cmd, capture_output=True, text=True)
@@ -95,7 +106,7 @@ def run_docker_compose():
         os.chdir(project_root)
 
         # Start PostgreSQL service only
-        cmd = ['docker-compose', 'up', '-d', 'postgres']
+        cmd = ["docker-compose", "up", "-d", "postgres"]
         result = subprocess.run(cmd, capture_output=True, text=True)
 
         if result.returncode == 0:
@@ -121,9 +132,17 @@ def wait_for_database():
         try:
             # Test database connection
             test_cmd = [
-                'psql', '-h', 'localhost', '-p', '5432',
-                '-U', 'ehb_user', '-d', 'ehb_database',
-                '-c', 'SELECT 1;'
+                "psql",
+                "-h",
+                "localhost",
+                "-p",
+                "5432",
+                "-U",
+                "ehb_user",
+                "-d",
+                "ehb_database",
+                "-c",
+                "SELECT 1;",
             ]
 
             result = subprocess.run(test_cmd, capture_output=True, text=True)
@@ -132,7 +151,9 @@ def wait_for_database():
                 print("✅ Database is ready!")
                 return True
             else:
-                print(f"⏳ Attempt {attempt + 1}/{max_attempts}: Database not ready yet...")
+                print(
+                    f"⏳ Attempt {attempt + 1}/{max_attempts}: Database not ready yet..."
+                )
                 time.sleep(2)
                 attempt += 1
 
@@ -155,7 +176,7 @@ def run_database_setup():
         os.chdir(backend_dir)
 
         # Run the setup script
-        cmd = ['python', 'database/setup.py']
+        cmd = ["python", "database/setup.py"]
         result = subprocess.run(cmd, capture_output=True, text=True)
 
         if result.returncode == 0:
@@ -180,12 +201,18 @@ def run_migrations():
         os.chdir(backend_dir)
 
         # Initialize Alembic if not already done
-        if not os.path.exists('alembic/versions'):
-            init_cmd = ['alembic', 'init', 'alembic']
+        if not os.path.exists("alembic/versions"):
+            init_cmd = ["alembic", "init", "alembic"]
             subprocess.run(init_cmd, capture_output=True)
 
         # Create initial migration
-        revision_cmd = ['alembic', 'revision', '--autogenerate', '-m', 'Initial migration']
+        revision_cmd = [
+            "alembic",
+            "revision",
+            "--autogenerate",
+            "-m",
+            "Initial migration",
+        ]
         result = subprocess.run(revision_cmd, capture_output=True, text=True)
 
         if result.returncode == 0:
@@ -194,7 +221,7 @@ def run_migrations():
             print(f"⚠️  Migration creation: {result.stderr}")
 
         # Apply migrations
-        upgrade_cmd = ['alembic', 'upgrade', 'head']
+        upgrade_cmd = ["alembic", "upgrade", "head"]
         result = subprocess.run(upgrade_cmd, capture_output=True, text=True)
 
         if result.returncode == 0:
@@ -255,7 +282,9 @@ def main():
     print(f"Database: ehb_database")
     print(f"Username: ehb_user")
     print(f"Password: ehb_password")
-    print(f"Connection URL: postgresql://ehb_user:ehb_password@localhost:5432/ehb_database")
+    print(
+        f"Connection URL: postgresql://ehb_user:ehb_password@localhost:5432/ehb_database"
+    )
 
     print("\n📋 Next Steps:")
     print("1. Update your .env file with the database URL")

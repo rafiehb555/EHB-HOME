@@ -1,244 +1,252 @@
-import { useState } from 'react';
-import Head from 'next/head';
-import { useQuery } from 'react-query';
-import axios from 'axios';
-import {
-  Users, TrendingUp, DollarSign, ShoppingCart, Shield, Building, Brain, Bot, Activity, AlertCircle, CheckCircle, Clock
-} from 'lucide-react';
-import Sidebar from '@/components/admin/Sidebar';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
-
-interface AdminStats {
-  total_users: number;
-  active_users: number;
-  new_users_today: number;
-  revenue_today: number;
-  revenue_month: number;
-  total_orders: number;
-  pending_verifications: number;
-  system_health: string;
-}
+import { useAuth } from '@/hooks/useAuth';
+import {
+    Activity,
+    AlertTriangle,
+    CheckCircle,
+    Clock,
+    Database,
+    Server,
+    Settings,
+    Shield,
+    TrendingUp,
+    Users
+} from 'lucide-react';
+import Head from 'next/head';
+import { useState } from 'react';
 
 interface ServiceStatus {
   name: string;
-  status: 'ready' | 'pending' | 'error';
+  status: 'running' | 'stopped' | 'error';
   port: number;
-  users: number;
   uptime: string;
+  requests: number;
 }
 
-const AdminDashboard = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  // Mock data for now - replace with actual API calls
-  const { data: stats } = useQuery('adminStats', async () => {
-    // In real app, fetch from /api/admin/stats
-    return {
-      total_users: 1250, active_users: 890, new_users_today: 45, revenue_today: 12500,
-      revenue_month: 375000, total_orders: 156, pending_verifications: 23, system_health: 'healthy'
-    } as AdminStats;
-  });
-
-  const { data: services } = useQuery('serviceStatus', async () => {
-    // In real app, fetch from /api/admin/services
-    return [
-      { name: 'GoSellr', status: 'ready', port: 4004, users: 450, uptime: '99.9%' },
-      { name: 'Wallet', status: 'ready', port: 5001, users: 320, uptime: '99.8%' },
-      { name: 'PSS', status: 'ready', port: 4001, users: 890, uptime: '99.9%' },
-      { name: 'EMO', status: 'ready', port: 4003, users: 234, uptime: '99.7%' },
-      { name: 'EDR', status: 'pending', port: 4002, users: 156, uptime: '98.5%' },
-      { name: 'JPS', status: 'ready', port: 4005, users: 678, uptime: '99.9%' },
-      { name: 'AI Agent', status: 'ready', port: 4007, users: 89, uptime: '99.6%' },
-      { name: 'AI Robot', status: 'error', port: 4008, users: 12, uptime: '85.2%' }
-    ] as ServiceStatus[];
-  });
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'ready': return 'bg-green-100 text-green-800';
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'error': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+export default function AdminDashboard() {
+  const { user } = useAuth();
+  const [services, setServices] = useState<ServiceStatus[]>([
+    {
+      name: 'Backend API',
+      status: 'running',
+      port: 8000,
+      uptime: '2h 15m',
+      requests: 1247
+    },
+    {
+      name: 'PSS Service',
+      status: 'running',
+      port: 4001,
+      uptime: '1h 45m',
+      requests: 892
+    },
+    {
+      name: 'EMO Service',
+      status: 'running',
+      port: 4003,
+      uptime: '1h 30m',
+      requests: 654
+    },
+    {
+      name: 'EDR Service',
+      status: 'running',
+      port: 4002,
+      uptime: '1h 20m',
+      requests: 543
     }
-  };
+  ]);
+
+  const [stats, setStats] = useState({
+    totalUsers: 1250,
+    activeUsers: 890,
+    totalRevenue: 2500000,
+    pendingVerifications: 45
+  });
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'ready': return <CheckCircle className="h-4 w-4 text-green-600" />;
-      case 'pending': return <Clock className="h-4 w-4 text-yellow-600" />;
-      case 'error': return <AlertCircle className="h-4 w-4 text-red-600" />;
-      default: return <Activity className="h-4 w-4 text-gray-400" />;
+      case 'running':
+        return <CheckCircle className="h-5 w-5 text-green-500" />;
+      case 'stopped':
+        return <Clock className="h-5 w-5 text-yellow-500" />;
+      case 'error':
+        return <AlertTriangle className="h-5 w-5 text-red-500" />;
+      default:
+        return <Clock className="h-5 w-5 text-gray-400" />;
     }
   };
 
-  const StatCard = ({ title, value, change, icon: Icon, color }: {
-    title: string; value: string | number; change?: string; icon: any; color: string;
-  }) => (
-    <div className="card">
-      <div className="flex items-center">
-        <div className="flex-shrink-0">
-          <Icon className={`h-8 w-8 ${color}`} />
-        </div>
-        <div className="ml-4">
-          <p className="text-sm font-medium text-gray-600">{title}</p>
-          <p className="text-2xl font-semibold text-gray-900">{value}</p>
-          {change && (
-            <p className="text-sm text-green-600 flex items-center">
-              <TrendingUp className="h-3 w-3 mr-1" />
-              {change}
-            </p>
-          )}
-        </div>
-      </div>
-    </div>
-  );
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'running':
+        return 'bg-green-100 text-green-800';
+      case 'stopped':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'error':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
 
   return (
     <ProtectedRoute requireAdmin={true}>
-      <Head>
-        <title>Admin Dashboard - EHB Technologies</title>
-        <meta name="description" content="EHB Admin Dashboard" />
-      </Head>
+      <div className="min-h-screen bg-gray-50">
+        <Head>
+          <title>Admin Dashboard - EHB Technologies</title>
+          <meta name="description" content="EHB Admin Dashboard" />
+        </Head>
 
-      <div className="flex h-screen bg-gray-100">
-        <Sidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
-
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <header className="bg-white shadow-sm border-b border-gray-200">
-            <div className="flex items-center justify-between px-6 py-4">
+        {/* Header */}
+        <header className="bg-white shadow-sm border-b">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center h-16">
               <div className="flex items-center">
-                <button
-                  onClick={() => setSidebarOpen(true)}
-                  className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
-                  title="Open Sidebar"
-                >
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                  </svg>
-                </button>
-                <h1 className="text-2xl font-semibold text-gray-900 ml-4">Admin Dashboard</h1>
+                <div className="text-2xl font-bold text-indigo-600">EHB</div>
+                <span className="ml-2 text-gray-500">Admin Dashboard</span>
               </div>
+
               <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                  <span className="text-sm text-gray-600">System Online</span>
-                </div>
-                <button className="btn-primary">Settings</button>
+                <span className="text-sm text-gray-600">Admin: {user?.email}</span>
               </div>
             </div>
-          </header>
-          <main className="flex-1 overflow-y-auto p-6">
-            {stats && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <StatCard
-                  title="Total Users" value={stats.total_users.toLocaleString()}
-                  change="+12% from last month" icon={Users} color="text-blue-600"
-                />
-                <StatCard
-                  title="Revenue Today" value={`$${stats.revenue_today.toLocaleString()}`}
-                  change="+8% from yesterday" icon={DollarSign} color="text-green-600"
-                />
-                <StatCard
-                  title="Total Orders" value={stats.total_orders.toLocaleString()}
-                  change="+5% from last week" icon={ShoppingCart} color="text-purple-600"
-                />
-                <StatCard
-                  title="Active Users" value={stats.active_users.toLocaleString()}
-                  change="+15% from yesterday" icon={Activity} color="text-orange-600"
-                />
-              </div>
-            )}
-            {services && (
-              <div className="mb-8">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Services Status</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {services.map((service) => (
-                    <div key={service.name} className="card">
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-medium text-gray-900">{service.name}</h3>
-                        <span className={`inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(service.status)}`}>
-                          {getStatusIcon(service.status)}
-                          <span className="ml-1">{service.status}</span>
-                        </span>
-                      </div>
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-600">Port</span>
-                          <span className="font-medium">{service.port}</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-600">Active Users</span>
-                          <span className="font-medium">{service.users}</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-600">Uptime</span>
-                          <span className="font-medium">{service.uptime}</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+          </div>
+        </header>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Welcome Section */}
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+            <p className="text-gray-600 mt-2">Monitor and manage the EHB ecosystem</p>
+          </div>
+
+          {/* Stats Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="flex items-center">
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <Users className="h-6 w-6 text-blue-600" />
                 </div>
-              </div>
-            )}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="card">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Recent Activity</h3>
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                    <span className="text-sm text-gray-600">New user registration: John Doe</span>
-                    <span className="text-xs text-gray-400">2 min ago</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                    <span className="text-sm text-gray-600">Order completed: #ORD-1234</span>
-                    <span className="text-xs text-gray-400">5 min ago</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
-                    <span className="text-sm text-gray-600">PSS verification pending: Jane Smith</span>
-                    <span className="text-xs text-gray-400">10 min ago</span>
-                  </div>
-                </div>
-              </div>
-              <div className="card">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">System Health</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">CPU Usage</span>
-                    <div className="flex items-center space-x-2">
-                      <div className="w-16 bg-gray-200 rounded-full h-2">
-                        <div className="bg-green-600 h-2 rounded-full" style={{ width: '45%' }}></div>
-                      </div>
-                      <span className="text-sm font-medium">45%</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Memory Usage</span>
-                    <div className="flex items-center space-x-2">
-                      <div className="w-16 bg-gray-200 rounded-full h-2">
-                        <div className="bg-blue-600 h-2 rounded-full" style={{ width: '62%' }}></div>
-                      </div>
-                      <span className="text-sm font-medium">62%</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Disk Usage</span>
-                    <div className="flex items-center space-x-2">
-                      <div className="w-16 bg-gray-200 rounded-full h-2">
-                        <div className="bg-yellow-600 h-2 rounded-full" style={{ width: '38%' }}></div>
-                      </div>
-                      <span className="text-sm font-medium">38%</span>
-                    </div>
-                  </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Total Users</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats.totalUsers.toLocaleString()}</p>
                 </div>
               </div>
             </div>
-          </main>
+
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="flex items-center">
+                <div className="p-2 bg-green-100 rounded-lg">
+                  <Activity className="h-6 w-6 text-green-600" />
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Active Users</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats.activeUsers.toLocaleString()}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="flex items-center">
+                <div className="p-2 bg-purple-100 rounded-lg">
+                  <TrendingUp className="h-6 w-6 text-purple-600" />
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Revenue</p>
+                  <p className="text-2xl font-bold text-gray-900">${(stats.totalRevenue / 1000000).toFixed(1)}M</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="flex items-center">
+                <div className="p-2 bg-yellow-100 rounded-lg">
+                  <Shield className="h-6 w-6 text-yellow-600" />
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Pending</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats.pendingVerifications}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Services Status */}
+          <div className="bg-white rounded-lg shadow">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h2 className="text-lg font-medium text-gray-900">Service Status</h2>
+              <p className="text-sm text-gray-600 mt-1">Monitor all EHB services</p>
+            </div>
+
+            <div className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {services.map((service) => (
+                  <div key={service.name} className="border border-gray-200 rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center space-x-3">
+                        <Server className="h-5 w-5 text-gray-400" />
+                        <div>
+                          <h3 className="font-medium text-gray-900">{service.name}</h3>
+                          <p className="text-sm text-gray-500">Port {service.port}</p>
+                        </div>
+                      </div>
+                      {getStatusIcon(service.status)}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p className="text-gray-600">Uptime</p>
+                        <p className="font-medium">{service.uptime}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-600">Requests</p>
+                        <p className="font-medium">{service.requests.toLocaleString()}</p>
+                      </div>
+                    </div>
+
+                    <div className="mt-3">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(service.status)}`}>
+                        {service.status.charAt(0).toUpperCase() + service.status.slice(1)}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="mt-8 bg-white rounded-lg shadow">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h2 className="text-lg font-medium text-gray-900">Quick Actions</h2>
+            </div>
+
+            <div className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <button className="flex items-center justify-center p-4 border border-gray-200 rounded-lg hover:border-indigo-300 hover:bg-indigo-50 transition-colors">
+                  <Users className="h-5 w-5 text-indigo-600 mr-2" />
+                  <span className="font-medium">Manage Users</span>
+                </button>
+
+                <button className="flex items-center justify-center p-4 border border-gray-200 rounded-lg hover:border-indigo-300 hover:bg-indigo-50 transition-colors">
+                  <Shield className="h-5 w-5 text-indigo-600 mr-2" />
+                  <span className="font-medium">Verify Users</span>
+                </button>
+
+                <button className="flex items-center justify-center p-4 border border-gray-200 rounded-lg hover:border-indigo-300 hover:bg-indigo-50 transition-colors">
+                  <Database className="h-5 w-5 text-indigo-600 mr-2" />
+                  <span className="font-medium">System Logs</span>
+                </button>
+
+                <button className="flex items-center justify-center p-4 border border-gray-200 rounded-lg hover:border-indigo-300 hover:bg-indigo-50 transition-colors">
+                  <Settings className="h-5 w-5 text-indigo-600 mr-2" />
+                  <span className="font-medium">Settings</span>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </ProtectedRoute>
   );
-};
-
-export default AdminDashboard;
+}

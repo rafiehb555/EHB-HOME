@@ -4,6 +4,16 @@ import os
 import sys
 from dotenv import load_dotenv
 
+from models.database.base import Base
+
+
+        from models.database.user import User
+        from models.database.service import Service
+        from models.database.transaction import Transaction
+
+
+
+
 # Add the backend directory to Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
@@ -30,9 +40,6 @@ engine = create_engine(
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Import Base from models
-from models.database.base import Base
-
-
 def get_db():
     """Dependency to get database session"""
     db = SessionLocal()
@@ -42,14 +49,13 @@ def get_db():
         db.close()
 
 
+
+
+
 def create_tables():
     """Create all database tables"""
     try:
         # Import all models
-        from models.database.user import User
-        from models.database.service import Service
-        from models.database.transaction import Transaction
-
         # Create tables
         Base.metadata.create_all(bind=engine)
         print("✅ Database tables created successfully!")
@@ -61,6 +67,9 @@ def create_tables():
 def drop_tables():
     """Drop all database tables"""
     Base.metadata.drop_all(bind=engine)
+
+
+
 
 
 def test_connection():

@@ -1,12 +1,14 @@
+import subprocess
+import sys
+import os
+from pathlib import Path
+
+
 #!/usr/bin/env python3
 """
 Test runner for EHB Home Page & Dashboard
 """
 
-import subprocess
-import sys
-import os
-from pathlib import Path
 
 def run_tests():
     """Run all tests"""
@@ -19,13 +21,19 @@ def run_tests():
 
     # Run pytest
     try:
-        result = subprocess.run([
-            sys.executable, "-m", "pytest",
-            "tests/",
-            "-v",
-            "--tb=short",
-            "--color=yes"
-        ], capture_output=True, text=True)
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "pytest",
+                "tests/",
+                "-v",
+                "--tb=short",
+                "--color=yes",
+            ],
+            capture_output=True,
+            text=True,
+        )
 
         print("Test Results:")
         print("-" * 30)
@@ -47,6 +55,7 @@ def run_tests():
         print(f"❌ Error running tests: {e}")
         return False
 
+
 def run_specific_test(test_file):
     """Run a specific test file"""
     print(f"🧪 Running test: {test_file}")
@@ -56,13 +65,19 @@ def run_specific_test(test_file):
     os.chdir(backend_dir)
 
     try:
-        result = subprocess.run([
-            sys.executable, "-m", "pytest",
-            f"tests/{test_file}",
-            "-v",
-            "--tb=short",
-            "--color=yes"
-        ], capture_output=True, text=True)
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "pytest",
+                f"tests/{test_file}",
+                "-v",
+                "--tb=short",
+                "--color=yes",
+            ],
+            capture_output=True,
+            text=True,
+        )
 
         print("Test Results:")
         print("-" * 30)
@@ -84,6 +99,7 @@ def run_specific_test(test_file):
         print(f"❌ Error running test: {e}")
         return False
 
+
 def run_coverage():
     """Run tests with coverage"""
     print("🧪 Running tests with coverage...")
@@ -93,16 +109,22 @@ def run_coverage():
     os.chdir(backend_dir)
 
     try:
-        result = subprocess.run([
-            sys.executable, "-m", "pytest",
-            "tests/",
-            "--cov=app",
-            "--cov=services",
-            "--cov=api",
-            "--cov-report=term-missing",
-            "--cov-report=html",
-            "-v"
-        ], capture_output=True, text=True)
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "pytest",
+                "tests/",
+                "--cov=app",
+                "--cov=services",
+                "--cov=api",
+                "--cov-report=term-missing",
+                "--cov-report=html",
+                "-v",
+            ],
+            capture_output=True,
+            text=True,
+        )
 
         print("Coverage Results:")
         print("-" * 30)
@@ -124,6 +146,7 @@ def run_coverage():
         print(f"❌ Error running coverage: {e}")
         return False
 
+
 def main():
     """Main function"""
     if len(sys.argv) > 1:
@@ -141,6 +164,7 @@ def main():
             print("  python run_tests.py coverage     # Run with coverage")
     else:
         run_tests()
+
 
 if __name__ == "__main__":
     main()

@@ -1,10 +1,11 @@
-"""
-Database utilities for EHB system
-"""
-
 from sqlalchemy.orm import Session
 from typing import Generator
 from models.base import SessionLocal
+
+
+"""
+Database utilities for EHB system
+"""
 
 
 def get_db() -> Generator[Session, None, None]:
@@ -45,7 +46,7 @@ def get_database_stats(db: Session) -> dict:
             "transactions": transaction_count or 0,
             "wallets": wallet_count or 0,
             "franchises": franchise_count or 0,
-            "verifications": verification_count or 0
+            "verifications": verification_count or 0,
         }
     except Exception as e:
         print(f"❌ Error getting database stats: {e}")
@@ -55,5 +56,5 @@ def get_database_stats(db: Session) -> dict:
             "transactions": 0,
             "wallets": 0,
             "franchises": 0,
-            "verifications": 0
+            "verifications": 0,
         }

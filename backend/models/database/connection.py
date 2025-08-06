@@ -4,12 +4,22 @@ from sqlalchemy.ext.declarative import declarative_base
 import os
 from dotenv import load_dotenv
 
+    from .user import User
+    from .service import Service, UserService
+    from .transaction import Transaction, Wallet
+
+        from .user import User, UserLevel
+        from .service import Service, ServiceType, ServiceStatus
+
+
+
+
 load_dotenv()
 
 # Database configuration
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql://postgres:ehb_password@localhost:5432/ehb_database"
+    "postgresql://ehb_user:ehb_password@localhost:5432/ehb_database"
 )
 
 # Create SQLAlchemy engine
@@ -39,10 +49,6 @@ def get_db():
 def create_tables():
     """Create all database tables"""
     # Import all models to register them with Base
-    from .user import User
-    from .service import Service, UserService
-    from .transaction import Transaction, Wallet
-
     # Create all tables
     Base.metadata.create_all(bind=engine)
 
@@ -52,14 +58,14 @@ def drop_tables():
     Base.metadata.drop_all(bind=engine)
 
 
+
+
+
 def init_db():
     """Initialize database with default data"""
     db = SessionLocal()
     try:
         # Import models
-        from .user import User, UserLevel
-        from .service import Service, ServiceType, ServiceStatus
-
         # Check if tables are empty
         user_count = db.query(User).count()
         service_count = db.query(Service).count()

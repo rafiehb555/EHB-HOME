@@ -5,6 +5,7 @@ This document provides a complete development and connection roadmap for all EHB
 
 ---
 
+
 ## ✅ Phase-Based Development Strategy
 
 ### 📍 Phase 1: User Identity, Verification & Base System
@@ -23,6 +24,7 @@ This document provides a complete development and connection roadmap for all EHB
 
 ---
 
+
 ### 📍 Phase 2: Commercial & Franchise Layer
 
 | Service | Folder | Ports | Linked To | Role |
@@ -36,6 +38,7 @@ This document provides a complete development and connection roadmap for all EHB
 
 ---
 
+
 ### 📍 Phase 3: Blockchain & Decentralization
 
 | Item | Folder | Linked To | Role |
@@ -48,6 +51,7 @@ This document provides a complete development and connection roadmap for all EHB
 > ⚙️ Blockchain integration uses **Moonbeam (ERC/BEP)** in early phase → later shift to parachain like **Mosaic**.
 
 ---
+
 
 ### 📍 Phase 4: Marketplace & AI Economy
 
@@ -66,15 +70,21 @@ This document provides a complete development and connection roadmap for all EHB
 
 ---
 
+
 ## 🔗 Inter-Service API Links
 
 - `SQL API`: Queried by all services for level check (`/get-sql/:userId`)
+
 - `Wallet API`: Used by GoSellr, Franchise, Ads, Affiliate, AI marketplace
+
 - `PSS/EMO/EDR` emit events to update SQL service
+
 - `JPS` shares user ID with SQL, Wallet, and AI services
+
 - `Franchise` API handles complaint resolution and earns income per order
 
 ---
+
 
 ## 👥 User Flow Summary
 
@@ -87,21 +97,28 @@ graph TD
   E --> F[Franchise/Complaint handling]
   C --> G[Can Apply for Franchise or Validator]
   G --> H[Stake EHBGC in Trusty Wallet]
+
 ```
 
 ---
 
+
 ## 🧠 Smart Cursor AI Development Agent Tips
 
 - Use each `md` file in folders as module guide
+
 - Prioritize `ehb-sql`, `wallet`, `dashboard`, and `gosellr` first
+
 - Connect all others via **shared user ID**, SQL level, and wallet tokens
+
 - Monitor SQL-level upgrade through event hooks from PSS, EMO, EDR
 
 ---
 
+
 ## 📦 Folder Placement Recommendation
 
 - All 25 service repos should include this `roadmap.md` for full reference
+
 - This is the heart of the project linking every module
 

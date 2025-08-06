@@ -1,11 +1,13 @@
+import requests
+import time
+
+
 #!/usr/bin/env python3
 """
 Simple EHB Services Test
 Quick test to check if services are running
 """
 
-import requests
-import time
 
 def test_service(url, name):
     """Test a service endpoint"""
@@ -23,6 +25,7 @@ def test_service(url, name):
     except Exception as e:
         print(f"❌ {name}: Error - {e}")
         return False
+
 
 def main():
     """Test all EHB services"""
@@ -52,10 +55,19 @@ def main():
     else:
         print("⚠️  Some services are not running")
         print("\nTo start services manually:")
-        print("1. Backend: cd backend && python -m uvicorn app.main:app --reload --port 8000")
-        print("2. PSS: cd services/pss && python -m uvicorn main:app --host 0.0.0.0 --port 4001 --reload")
-        print("3. EMO: cd services/emo && python -m uvicorn main:app --host 0.0.0.0 --port 4003 --reload")
-        print("4. EDR: cd services/edr && python -m uvicorn main:app --host 0.0.0.0 --port 4002 --reload")
+        print(
+            "1. Backend: cd backend && python -m uvicorn app.main:app --reload --port 8000"
+        )
+        print(
+            "2. PSS: cd services/pss && python -m uvicorn main:app --host 0.0.0.0 --port 4001 --reload"
+        )
+        print(
+            "3. EMO: cd services/emo && python -m uvicorn main:app --host 0.0.0.0 --port 4003 --reload"
+        )
+        print(
+            "4. EDR: cd services/edr && python -m uvicorn main:app --host 0.0.0.0 --port 4002 --reload"
+        )
+
 
 if __name__ == "__main__":
     main()

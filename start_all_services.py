@@ -1,14 +1,16 @@
+import subprocess
+import time
+import sys
+import os
+from pathlib import Path
+
+
 #!/usr/bin/env python3
 """
 EHB Services Startup Script
 Starts all EHB services in separate processes
 """
 
-import subprocess
-import time
-import sys
-import os
-from pathlib import Path
 
 def start_service(name, command, cwd=None):
     """Start a service in a new process"""
@@ -19,10 +21,7 @@ def start_service(name, command, cwd=None):
 
         # Start the service
         process = subprocess.Popen(
-            command,
-            shell=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
+            command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
         )
 
         print(f"✅ {name} started (PID: {process.pid})")
@@ -30,6 +29,7 @@ def start_service(name, command, cwd=None):
     except Exception as e:
         print(f"❌ Failed to start {name}: {e}")
         return None
+
 
 def main():
     """Start all EHB services"""
@@ -44,34 +44,30 @@ def main():
         {
             "name": "Backend API",
             "command": "python -m uvicorn app.main:app --reload --port 8000",
-            "cwd": project_root / "backend"
+            "cwd": project_root / "backend",
         },
         {
             "name": "PSS Service",
             "command": "python -m uvicorn main:app --host 0.0.0.0 --port 4001 --reload",
-            "cwd": project_root / "services" / "pss"
+            "cwd": project_root / "services" / "pss",
         },
         {
             "name": "EMO Service",
             "command": "python -m uvicorn main:app --host 0.0.0.0 --port 4003 --reload",
-            "cwd": project_root / "services" / "emo"
+            "cwd": project_root / "services" / "emo",
         },
         {
             "name": "EDR Service",
             "command": "python -m uvicorn main:app --host 0.0.0.0 --port 4002 --reload",
-            "cwd": project_root / "services" / "edr"
-        }
+            "cwd": project_root / "services" / "edr",
+        },
     ]
 
     processes = []
 
     # Start each service
     for service in services:
-        process = start_service(
-            service["name"],
-            service["command"],
-            service["cwd"]
-        )
+        process = start_service(service["name"], service["command"], service["cwd"])
         if process:
             processes.append((service["name"], process))
 
@@ -109,6 +105,7 @@ def main():
                 process.terminate()
                 print(f"🛑 Stopped {name}")
         print("✅ All services stopped")
+
 
 if __name__ == "__main__":
     main()

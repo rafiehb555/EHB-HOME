@@ -1,4 +1,13 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Enum, Text, ForeignKey
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Boolean,
+    DateTime,
+    Enum,
+    Text,
+    ForeignKey,
+)
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 import enum
@@ -60,22 +69,24 @@ class Service(Base):
 
     def to_dict(self):
         return {
-            'id': self.id,
-            'name': self.name,
-            'type': self.type.value if self.type else None,
-            'status': self.status.value if self.status else None,
-            'port': self.port,
-            'host': self.host,
-            'endpoint': self.endpoint,
-            'description': self.description,
-            'version': self.version,
-            'documentation_url': self.documentation_url,
-            'is_healthy': self.is_healthy,
-            'response_time': self.response_time,
-            'error_count': self.error_count,
-            'created_at': self.created_at.isoformat() if self.created_at else None,
-            'updated_at': self.updated_at.isoformat() if self.updated_at else None,
-            'last_health_check': self.last_health_check.isoformat() if self.last_health_check else None
+            "id": self.id,
+            "name": self.name,
+            "type": self.type.value if self.type else None,
+            "status": self.status.value if self.status else None,
+            "port": self.port,
+            "host": self.host,
+            "endpoint": self.endpoint,
+            "description": self.description,
+            "version": self.version,
+            "documentation_url": self.documentation_url,
+            "is_healthy": self.is_healthy,
+            "response_time": self.response_time,
+            "error_count": self.error_count,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+            "last_health_check": (
+                self.last_health_check.isoformat() if self.last_health_check else None
+            ),
         }
 
 
@@ -110,13 +121,13 @@ class UserService(Base):
 
     def to_dict(self):
         return {
-            'id': self.id,
-            'user_id': self.user_id,
-            'service_id': self.service_id,
-            'is_enabled': self.is_enabled,
-            'access_level': self.access_level,
-            'usage_count': self.usage_count,
-            'last_used': self.last_used.isoformat() if self.last_used else None,
-            'created_at': self.created_at.isoformat() if self.created_at else None,
-            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+            "id": self.id,
+            "user_id": self.user_id,
+            "service_id": self.service_id,
+            "is_enabled": self.is_enabled,
+            "access_level": self.access_level,
+            "usage_count": self.usage_count,
+            "last_used": self.last_used.isoformat() if self.last_used else None,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
         }

@@ -1,0 +1,126 @@
+{
+  "main_backend": {
+    "status": "healthy",
+    "response_time": 2044.086,
+    "data": {
+      "status": "healthy",
+      "timestamp": "2025-08-06T07:27:25.522585",
+      "services": {
+        "pss": {
+          "status": "ready",
+          "port": 4001,
+          "users": 890
+        },
+        "emo": {
+          "status": "ready",
+          "port": 4003,
+          "users": 234
+        },
+        "edr": {
+          "status": "pending",
+          "port": 4002,
+          "users": 156
+        },
+        "jps": {
+          "status": "ready",
+          "port": 4005,
+          "users": 678
+        },
+        "gosellr": {
+          "status": "ready",
+          "port": 4004,
+          "users": 450
+        },
+        "wallet": {
+          "status": "ready",
+          "port": 5001,
+          "users": 320
+        },
+        "ai-agent": {
+          "status": "ready",
+          "port": 4007,
+          "users": 89
+        },
+        "ai-robot": {
+          "status": "error",
+          "port": 4008,
+          "users": 12
+        }
+      },
+      "database": "connected"
+    }
+  },
+  "pss": {
+    "status": "offline",
+    "error": "Connection refused",
+    "response_time": null
+  },
+  "emo": {
+    "status": "offline",
+    "error": "Connection refused",
+    "response_time": null
+  },
+  "edr": {
+    "status": "offline",
+    "error": "Connection refused",
+    "response_time": null
+  },
+  "gosellr": {
+    "status": "offline",
+    "error": "Connection refused",
+    "response_time": null
+  },
+  "frontend": {
+    "status": "error",
+    "error": "HTTP 404",
+    "response_time": 11.563
+  },
+  "main_backend_endpoints": {
+    "health": {
+      "status": "success",
+      "status_code": 200,
+      "response_time": 2015.389
+    },
+    "services": {
+      "status": "success",
+      "status_code": 200,
+      "response_time": 2036.775
+    },
+    "dashboard": {
+      "status": "success",
+      "status_code": 200,
+      "response_time": 2040.4650000000001
+    },
+    "stats": {
+      "status": "success",
+      "status_code": 200,
+      "response_time": 2053.178
+    }
+  },
+  "frontend_pages": {
+    "/": {
+      "status": "success",
+      "status_code": 200,
+      "content_length": 32854
+    },
+    "/dashboard": {
+      "status": "success",
+      "status_code": 200,
+      "content_length": 9287
+    },
+    "/services": {
+      "status": "success",
+      "status_code": 200,
+      "content_length": 22166
+    }
+  },
+  "summary": {
+    "total_services": 6,
+    "healthy_services": 1,
+    "unhealthy_services": 5,
+    "health_percentage": 16.666666666666664,
+    "average_response_time": 2044.086,
+    "test_duration": 26.832316,
+    "timestamp": "2025-08-06T12:27:50.308855"
+  }
+}

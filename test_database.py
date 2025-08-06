@@ -1,17 +1,23 @@
+import sys
+import os
+from backend.utils.database.connection import test_connection, create_tables
+from backend.models.database.user import User
+from backend.models.database.service import Service, ServiceLog
+from backend.models.database.transaction import Transaction, Wallet
+
+            from sqlalchemy.orm import Session
+            from backend.utils.database.connection import SessionLocal
+
+
+
+
 #!/usr/bin/env python3
 """
 Database Connection Test Script
 Tests the PostgreSQL database connection and creates tables
 """
 
-import sys
-import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-
-from backend.utils.database.connection import test_connection, create_tables
-from backend.models.database.user import User
-from backend.models.database.service import Service, ServiceLog
-from backend.models.database.transaction import Transaction, Wallet
 
 def main():
     print("🔍 Testing Database Connection...")
@@ -28,9 +34,6 @@ def main():
 
             # Test data insertion
             print("📊 Testing data insertion...")
-            from sqlalchemy.orm import Session
-            from backend.utils.database.connection import SessionLocal
-
             db = SessionLocal()
 
             # Create test service

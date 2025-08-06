@@ -3,11 +3,13 @@ from sqlalchemy.sql import func
 import enum
 from .base import Base
 
+
 class UserLevel(enum.Enum):
     BASIC = "basic"
     PREMIUM = "premium"
     ENTERPRISE = "enterprise"
     ADMIN = "admin"
+
 
 class User(Base):
     __tablename__ = "users"
@@ -51,23 +53,23 @@ class User(Base):
 
     def to_dict(self):
         return {
-            'id': self.id,
-            'email': self.email,
-            'username': self.username,
-            'first_name': self.first_name,
-            'last_name': self.last_name,
-            'phone': self.phone,
-            'sql_level': self.sql_level.value if self.sql_level else None,
-            'is_verified': self.is_verified,
-            'is_active': self.is_active,
-            'is_admin': self.is_admin,
-            'avatar_url': self.avatar_url,
-            'company': self.company,
-            'position': self.position,
-            'created_at': self.created_at.isoformat() if self.created_at else None,
-            'updated_at': self.updated_at.isoformat() if self.updated_at else None,
-            'last_login': self.last_login.isoformat() if self.last_login else None,
-            'email_verified': self.email_verified,
-            'phone_verified': self.phone_verified,
-            'kyc_verified': self.kyc_verified
+            "id": self.id,
+            "email": self.email,
+            "username": self.username,
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "phone": self.phone,
+            "sql_level": self.sql_level.value if self.sql_level else None,
+            "is_verified": self.is_verified,
+            "is_active": self.is_active,
+            "is_admin": self.is_admin,
+            "avatar_url": self.avatar_url,
+            "company": self.company,
+            "position": self.position,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+            "last_login": self.last_login.isoformat() if self.last_login else None,
+            "email_verified": self.email_verified,
+            "phone_verified": self.phone_verified,
+            "kyc_verified": self.kyc_verified,
         }

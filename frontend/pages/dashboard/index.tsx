@@ -1,98 +1,73 @@
-import { useState, useEffect } from 'react';
-import Head from 'next/head';
-import { useAuth } from '@/hooks/useAuth';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
+import { useAuth } from '@/hooks/useAuth';
 import {
-  User,
-  Shield,
-  Building,
-  Brain,
-  Wallet,
-  ShoppingCart,
-  Settings,
-  LogOut,
-  TrendingUp,
-  CheckCircle,
-  Clock,
-  AlertCircle,
-  ExternalLink
+    AlertCircle,
+    Bell,
+    CheckCircle,
+    Clock,
+    LogOut,
+    Settings,
+    Shield,
+    TrendingUp,
+    User,
+    Wallet
 } from 'lucide-react';
-import Link from 'next/link';
+import Head from 'next/head';
+import { useEffect, useState } from 'react';
 
-const DashboardPage = () => {
+interface VerificationStatus {
+  pss: 'verified' | 'pending' | 'failed';
+  emo: 'verified' | 'pending' | 'failed';
+  edr: 'verified' | 'pending' | 'failed';
+  jps: 'verified' | 'pending' | 'failed';
+}
+
+export default function DashboardPage() {
   const { user, logout } = useAuth();
-  const [activeTab, setActiveTab] = useState('overview');
-  const [verificationStatus, setVerificationStatus] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
+  const [verificationStatus, setVerificationStatus] = useState<VerificationStatus>({
+    pss: 'pending',
+    emo: 'pending',
+    edr: 'pending',
+    jps: 'pending'
+  });
+
+  const [stats, setStats] = useState({
+    sqlLevel: 1,
+    points: 150,
+    rank: 'Bronze',
+    totalServices: 4,
+    completedServices: 1
+  });
 
   useEffect(() => {
-    if (user) {
-      fetchVerificationStatus();
-    }
-  }, [user]);
-
-  const fetchVerificationStatus = async () => {
-    if (!user) return;
-
-    try {
-      setLoading(true);
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:8000/api/v1/services/user/${user.id}/verification-status`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
+    // Fetch user verification status
+    const fetchVerificationStatus = async () => {
+      try {
+        const response = await fetch('http://localhost:8000/api/v1/services/verification-status', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setVerificationStatus(data);
         }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setVerificationStatus(data);
+      } catch (error) {
+        console.error('Error fetching verification status:', error);
       }
-    } catch (error) {
-      console.error('Error fetching verification status:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
-  const verificationSteps = [
-    {
-      name: 'PSS Verification',
-      icon: Shield,
-      service: 'pss',
-      description: 'Personal Security System verification',
-      color: 'text-blue-600'
-    },
-    {
-      name: 'EMO Verification',
-      icon: Building,
-      service: 'emo',
-      description: 'Easy Management Office verification',
-      color: 'text-green-600'
-    },
-    {
-      name: 'EDR Verification',
-      icon: Brain,
-      service: 'edr',
-      description: 'Exam Decision Registration',
-      color: 'text-purple-600'
-    },
-    {
-      name: 'JPS Verification',
-      icon: User,
-      service: 'jps',
-      description: 'Job Profile System verification',
-      color: 'text-orange-600'
-    }
-  ];
+    fetchVerificationStatus();
+  }, []);
 
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'verified':
-        return <CheckCircle className="h-5 w-5 text-green-600" />;
+        return <CheckCircle className="h-5 w-5 text-green-500" />;
       case 'pending':
-        return <Clock className="h-5 w-5 text-yellow-600" />;
+        return <Clock className="h-5 w-5 text-yellow-500" />;
       case 'failed':
-        return <AlertCircle className="h-5 w-5 text-red-600" />;
+        return <AlertCircle className="h-5 w-5 text-red-500" />;
       default:
         return <Clock className="h-5 w-5 text-gray-400" />;
     }
@@ -111,60 +86,70 @@ const DashboardPage = () => {
     }
   };
 
-  const getServiceStatus = (serviceName: string) => {
-    if (!verificationStatus?.verification_status) return 'pending';
-    return verificationStatus.verification_status[serviceName]?.status || 'pending';
-  };
-
-  const getServiceScore = (serviceName: string) => {
-    if (!verificationStatus?.verification_status) return 0;
-    return verificationStatus.verification_status[serviceName]?.score || 0;
-  };
-
-  const getOverallProgress = () => {
-    if (!verificationStatus) return 0;
-    return verificationStatus.overall_progress || 0;
-  };
-
-  const getVerifiedCount = () => {
-    if (!verificationStatus) return 0;
-    return verificationStatus.verified_services || 0;
-  };
-
-  const getTotalServices = () => {
-    if (!verificationStatus) return 0;
-    return verificationStatus.total_services || 0;
-  };
+  const services = [
+    {
+      id: 'pss',
+      name: 'Personal Security System',
+      description: 'Identity verification and KYC',
+      status: verificationStatus.pss,
+      port: 4001
+    },
+    {
+      id: 'emo',
+      name: 'Easy Management Office',
+      description: 'Business verification and management',
+      status: verificationStatus.emo,
+      port: 4003
+    },
+    {
+      id: 'edr',
+      name: 'Exam Decision Registration',
+      description: 'Skill testing and certification',
+      status: verificationStatus.edr,
+      port: 4002
+    },
+    {
+      id: 'jps',
+      name: 'Job Profile System',
+      description: 'Professional profile management',
+      status: verificationStatus.jps,
+      port: 4004
+    }
+  ];
 
   return (
     <ProtectedRoute>
-      <Head>
-        <title>Dashboard - EHB Technologies</title>
-        <meta name="description" content="Your EHB dashboard" />
-      </Head>
-
       <div className="min-h-screen bg-gray-50">
+        <Head>
+          <title>Dashboard - EHB Technologies</title>
+          <meta name="description" content="Your EHB dashboard" />
+        </Head>
+
         {/* Header */}
-        <header className="bg-white shadow-sm border-b border-gray-200">
+        <header className="bg-white shadow-sm border-b">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center py-4">
+            <div className="flex justify-between items-center h-16">
               <div className="flex items-center">
-                <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">E</span>
-                </div>
-                <h1 className="text-xl font-semibold text-gray-900 ml-3">EHB Dashboard</h1>
+                <div className="text-2xl font-bold text-indigo-600">EHB</div>
+                <span className="ml-2 text-gray-500">Dashboard</span>
               </div>
+
               <div className="flex items-center space-x-4">
+                <button className="p-2 text-gray-400 hover:text-gray-600">
+                  <Bell className="h-5 w-5" />
+                </button>
                 <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                  <span className="text-sm text-gray-600">SQL Level: {user?.sql_level}</span>
+                  <div className="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center">
+                    <User className="h-4 w-4 text-white" />
+                  </div>
+                  <span className="text-sm font-medium">{user?.email || 'User'}</span>
                 </div>
                 <button
                   onClick={logout}
-                  className="flex items-center space-x-2 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
+                  className="flex items-center space-x-1 text-gray-600 hover:text-gray-800"
                 >
                   <LogOut className="h-4 w-4" />
-                  <span>Logout</span>
+                  <span className="text-sm">Logout</span>
                 </button>
               </div>
             </div>
@@ -174,160 +159,111 @@ const DashboardPage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Welcome Section */}
           <div className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-900">
-              Welcome back, {user?.full_name}!
-            </h2>
-            <p className="text-gray-600">
-              Your SQL Level: <span className="font-semibold">{user?.sql_level}</span> •
-              Points: <span className="font-semibold">{user?.sql_points}</span>
-            </p>
+            <h1 className="text-3xl font-bold text-gray-900">Welcome back!</h1>
+            <p className="text-gray-600 mt-2">Here's your EHB ecosystem overview</p>
           </div>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <div className="bg-white rounded-lg shadow p-6">
               <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <Shield className="h-8 w-8 text-blue-600" />
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <Shield className="h-6 w-6 text-blue-600" />
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Verification Progress</p>
-                  <p className="text-2xl font-semibold text-gray-900">{Math.round(getOverallProgress())}%</p>
+                  <p className="text-sm font-medium text-gray-600">SQL Level</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats.sqlLevel}</p>
                 </div>
               </div>
             </div>
 
             <div className="bg-white rounded-lg shadow p-6">
               <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <TrendingUp className="h-8 w-8 text-green-600" />
+                <div className="p-2 bg-green-100 rounded-lg">
+                  <TrendingUp className="h-6 w-6 text-green-600" />
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">SQL Rank</p>
-                  <p className="text-2xl font-semibold text-gray-900">{user?.sql_rank}</p>
+                  <p className="text-sm font-medium text-gray-600">Points</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats.points}</p>
                 </div>
               </div>
             </div>
 
             <div className="bg-white rounded-lg shadow p-6">
               <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <Wallet className="h-8 w-8 text-purple-600" />
+                <div className="p-2 bg-purple-100 rounded-lg">
+                  <User className="h-6 w-6 text-purple-600" />
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Account Status</p>
-                  <p className="text-2xl font-semibold text-gray-900">{user?.status}</p>
+                  <p className="text-sm font-medium text-gray-600">Rank</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats.rank}</p>
                 </div>
               </div>
             </div>
 
             <div className="bg-white rounded-lg shadow p-6">
               <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <User className="h-8 w-8 text-indigo-600" />
+                <div className="p-2 bg-yellow-100 rounded-lg">
+                  <Wallet className="h-6 w-6 text-yellow-600" />
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">User ID</p>
-                  <p className="text-2xl font-semibold text-gray-900">#{user?.id}</p>
+                  <p className="text-sm font-medium text-gray-600">Services</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats.completedServices}/{stats.totalServices}</p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Verification Steps */}
-          <div className="bg-white rounded-lg shadow mb-8">
+          {/* Services Section */}
+          <div className="bg-white rounded-lg shadow">
             <div className="px-6 py-4 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900">Verification Steps</h3>
-                  <p className="text-sm text-gray-600">Complete these steps to unlock all features</p>
-                </div>
-                <Link
-                  href="/services"
-                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  <span>Manage Services</span>
-                </Link>
-              </div>
+              <h2 className="text-lg font-medium text-gray-900">Verification Services</h2>
+              <p className="text-sm text-gray-600 mt-1">Complete your verification to unlock all features</p>
             </div>
-            <div className="p-6">
-              <div className="space-y-4">
-                {verificationSteps.map((step) => {
-                  const Icon = step.icon;
-                  const status = getServiceStatus(step.service);
-                  const score = getServiceScore(step.service);
 
-                  return (
-                    <div key={step.name} className="flex items-center space-x-4">
-                      <div className="flex-shrink-0">
-                        <Icon className={`h-6 w-6 ${step.color}`} />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-sm font-medium text-gray-900">{step.name}</p>
-                            <p className="text-sm text-gray-500">{step.description}</p>
-                            {score > 0 && (
-                              <div className="mt-1">
-                                <div className="flex items-center space-x-2">
-                                  <div className="flex-1 bg-gray-200 rounded-full h-2">
-                                    <div
-                                      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                                      style={{ width: `${score}%` }}
-                                    ></div>
-                                  </div>
-                                  <span className="text-xs text-gray-500">{score}%</span>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            {getStatusIcon(status)}
-                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(status)}`}>
-                              {status}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
+            <div className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {services.map((service) => (
+                  <div key={service.id} className="border border-gray-200 rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-medium text-gray-900">{service.name}</h3>
+                      {getStatusIcon(service.status)}
                     </div>
-                  );
-                })}
+                    <p className="text-sm text-gray-600 mb-3">{service.description}</p>
+                    <div className="flex items-center justify-between">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(service.status)}`}>
+                        {service.status.charAt(0).toUpperCase() + service.status.slice(1)}
+                      </span>
+                      <span className="text-xs text-gray-500">Port {service.port}</span>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
 
           {/* Quick Actions */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <Link href="/services" className="block">
-              <div className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow cursor-pointer">
-                <div className="flex items-center space-x-3">
-                  <Shield className="h-8 w-8 text-blue-600" />
-                  <div>
-                    <h3 className="text-lg font-medium text-gray-900">Services</h3>
-                    <p className="text-sm text-gray-600">Manage verifications</p>
-                  </div>
-                </div>
-              </div>
-            </Link>
-
-            <div className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow cursor-pointer">
-              <div className="flex items-center space-x-3">
-                <ShoppingCart className="h-8 w-8 text-green-600" />
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900">GoSellr</h3>
-                  <p className="text-sm text-gray-600">E-commerce marketplace</p>
-                </div>
-              </div>
+          <div className="mt-8 bg-white rounded-lg shadow">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h2 className="text-lg font-medium text-gray-900">Quick Actions</h2>
             </div>
 
-            <div className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow cursor-pointer">
-              <div className="flex items-center space-x-3">
-                <Wallet className="h-8 w-8 text-purple-600" />
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900">Wallet</h3>
-                  <p className="text-sm text-gray-600">Manage your finances</p>
-                </div>
+            <div className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <button className="flex items-center justify-center p-4 border border-gray-200 rounded-lg hover:border-indigo-300 hover:bg-indigo-50 transition-colors">
+                  <Shield className="h-5 w-5 text-indigo-600 mr-2" />
+                  <span className="font-medium">Verify Identity</span>
+                </button>
+
+                <button className="flex items-center justify-center p-4 border border-gray-200 rounded-lg hover:border-indigo-300 hover:bg-indigo-50 transition-colors">
+                  <TrendingUp className="h-5 w-5 text-indigo-600 mr-2" />
+                  <span className="font-medium">Upgrade SQL Level</span>
+                </button>
+
+                <button className="flex items-center justify-center p-4 border border-gray-200 rounded-lg hover:border-indigo-300 hover:bg-indigo-50 transition-colors">
+                  <Settings className="h-5 w-5 text-indigo-600 mr-2" />
+                  <span className="font-medium">Account Settings</span>
+                </button>
               </div>
             </div>
           </div>
@@ -335,6 +271,4 @@ const DashboardPage = () => {
       </div>
     </ProtectedRoute>
   );
-};
-
-export default DashboardPage;
+}

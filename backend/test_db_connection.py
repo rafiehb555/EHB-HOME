@@ -1,10 +1,15 @@
+import psycopg2
+import os
+
+        from sqlalchemy import create_engine, text
+
+
+
+
 #!/usr/bin/env python3
 """
 Test Database Connection
 """
-
-import psycopg2
-import os
 
 # Set the database URL environment variable
 os.environ['DATABASE_URL'] = 'postgresql://ehb_user:postgres@localhost:5433/ehb_database'
@@ -46,8 +51,6 @@ def test_sqlalchemy():
     print("\n🔍 Testing SQLAlchemy connection...")
 
     try:
-        from sqlalchemy import create_engine, text
-
         # Create engine with the correct URL
         engine = create_engine(
             "postgresql://ehb_user:postgres@localhost:5433/ehb_database",

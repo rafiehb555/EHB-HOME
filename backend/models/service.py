@@ -1,7 +1,3 @@
-"""
-Service Model for EHB System
-"""
-
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, Enum, Float
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
@@ -9,8 +5,14 @@ import enum
 from .base import Base
 
 
+"""
+Service Model for EHB System
+"""
+
+
 class ServiceType(enum.Enum):
     """Service types"""
+
     PSS = "pss"
     EMO = "emo"
     EDR = "edr"
@@ -25,6 +27,7 @@ class ServiceType(enum.Enum):
 
 class ServiceStatus(enum.Enum):
     """Service status"""
+
     ACTIVE = "active"
     INACTIVE = "inactive"
     MAINTENANCE = "maintenance"
@@ -33,6 +36,7 @@ class ServiceStatus(enum.Enum):
 
 class Service(Base):
     """Service model for EHB system"""
+
     __tablename__ = "services"
 
     id = Column(Integer, primary_key=True, index=True)

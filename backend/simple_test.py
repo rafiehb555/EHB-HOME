@@ -1,11 +1,13 @@
+import requests
+import json
+import time
+
+
 #!/usr/bin/env python3
 """
 Simple test runner for basic functionality
 """
 
-import requests
-import json
-import time
 
 def test_backend_health():
     """Test backend health"""
@@ -22,6 +24,7 @@ def test_backend_health():
         print(f"❌ Backend health check error: {e}")
         return False
 
+
 def test_services_health():
     """Test services health"""
     print("🔍 Testing Services Health...")
@@ -29,7 +32,9 @@ def test_services_health():
         response = requests.get("http://localhost:8000/api/v1/services/health")
         if response.status_code == 200:
             data = response.json()
-            print(f"✅ Services health: {data['healthy_services']}/{data['total_services']} healthy")
+            print(
+                f"✅ Services health: {data['healthy_services']}/{data['total_services']} healthy"
+            )
             return True
         else:
             print(f"❌ Services health check failed: {response.status_code}")
@@ -38,15 +43,18 @@ def test_services_health():
         print(f"❌ Services health check error: {e}")
         return False
 
+
 def test_available_services():
     """Test available services"""
     print("🔍 Testing Available Services...")
     try:
-        response = requests.get("http://localhost:8000/api/v1/services/available-services")
+        response = requests.get(
+            "http://localhost:8000/api/v1/services/available-services"
+        )
         if response.status_code == 200:
             data = response.json()
             print(f"✅ Found {len(data['services'])} available services")
-            for service in data['services']:
+            for service in data["services"]:
                 print(f"   - {service['display_name']} ({service['name']})")
             return True
         else:
@@ -56,6 +64,7 @@ def test_available_services():
         print(f"❌ Available services check error: {e}")
         return False
 
+
 def test_user_registration():
     """Test user registration"""
     print("🔍 Testing User Registration...")
@@ -64,16 +73,18 @@ def test_user_registration():
             "email": f"test{int(time.time())}@example.com",
             "username": f"testuser{int(time.time())}",
             "full_name": "Test User",
-            "password": "TestPass123"
+            "password": "TestPass123",
         }
 
-        response = requests.post("http://localhost:8000/api/v1/auth/register", json=user_data)
+        response = requests.post(
+            "http://localhost:8000/api/v1/auth/register", json=user_data
+        )
         if response.status_code == 200:
             data = response.json()
             print("✅ User registration successful")
             print(f"   - User ID: {data['user_id']}")
             print(f"   - Email: {data['email']}")
-            return data['access_token']
+            return data["access_token"]
         else:
             print(f"❌ User registration failed: {response.status_code}")
             print(f"   - Response: {response.text}")
@@ -82,26 +93,27 @@ def test_user_registration():
         print(f"❌ User registration error: {e}")
         return None
 
+
 def test_user_login():
     """Test user login"""
     print("🔍 Testing User Login...")
     try:
-        login_data = {
-            "username": "test@example.com",
-            "password": "TestPass123"
-        }
+        login_data = {"username": "test@example.com", "password": "TestPass123"}
 
-        response = requests.post("http://localhost:8000/api/v1/auth/login", data=login_data)
+        response = requests.post(
+            "http://localhost:8000/api/v1/auth/login", data=login_data
+        )
         if response.status_code == 200:
             data = response.json()
             print("✅ User login successful")
-            return data['access_token']
+            return data["access_token"]
         else:
             print(f"❌ User login failed: {response.status_code}")
             return None
     except Exception as e:
         print(f"❌ User login error: {e}")
         return None
+
 
 def test_get_current_user(token):
     """Test getting current user"""
@@ -123,6 +135,7 @@ def test_get_current_user(token):
         print(f"❌ Get current user error: {e}")
         return False
 
+
 def test_dashboard_data():
     """Test dashboard data"""
     print("🔍 Testing Dashboard Data...")
@@ -142,13 +155,14 @@ def test_dashboard_data():
         print(f"❌ Dashboard data error: {e}")
         return False
 
+
 def test_individual_services():
     """Test individual services"""
     print("🔍 Testing Individual Services...")
     services = [
         {"name": "PSS", "url": "http://localhost:4001"},
         {"name": "EMO", "url": "http://localhost:4003"},
-        {"name": "EDR", "url": "http://localhost:4002"}
+        {"name": "EDR", "url": "http://localhost:4002"},
     ]
 
     for service in services:
@@ -157,9 +171,12 @@ def test_individual_services():
             if response.status_code == 200:
                 print(f"✅ {service['name']} service is healthy")
             else:
-                print(f"❌ {service['name']} service health check failed: {response.status_code}")
+                print(
+                    f"❌ {service['name']} service health check failed: {response.status_code}"
+                )
         except Exception as e:
             print(f"❌ {service['name']} service error: {e}")
+
 
 def main():
     """Main test function"""
@@ -190,6 +207,7 @@ def main():
 
     print("\n" + "=" * 50)
     print("✅ Simple tests completed!")
+
 
 if __name__ == "__main__":
     main()

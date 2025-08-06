@@ -1,19 +1,21 @@
+import os
+import sys
+from pathlib import Path
+
+from models.database.connection import create_tables, init_db, engine
+from sqlalchemy import text
+
+
 #!/usr/bin/env python3
 """
 EHB Database Setup Script
 Initializes the database with tables and default data
 """
 
-import os
-import sys
-from pathlib import Path
-
 # Add the backend directory to Python path
 backend_dir = Path(__file__).parent
 sys.path.insert(0, str(backend_dir))
 
-from models.database.connection import create_tables, init_db, engine
-from sqlalchemy import text
 
 def test_database_connection():
     """Test if we can connect to the database"""
@@ -25,6 +27,7 @@ def test_database_connection():
     except Exception as e:
         print(f"❌ Database connection failed: {e}")
         return False
+
 
 def setup_database():
     """Setup the complete database"""
@@ -53,6 +56,7 @@ def setup_database():
         print(f"❌ Error during database setup: {e}")
         return False
 
+
 def main():
     """Main function"""
     print("🚀 EHB Database Setup")
@@ -72,6 +76,7 @@ def main():
         print("   - PostgreSQL is running")
         print("   - Database credentials are correct")
         print("   - Docker container is active")
+
 
 if __name__ == "__main__":
     main()

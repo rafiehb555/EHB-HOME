@@ -8,6 +8,7 @@ from app.main import app
 from utils.database.connection import get_db
 from models.database.base import Base
 
+
 # Create in-memory database for testing
 SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
 
@@ -36,13 +37,14 @@ client = TestClient(app)
 
 
 class TestAuth:
+
     def test_register_user(self):
         """Test user registration"""
         user_data = {
             "email": "test@example.com",
             "username": "testuser",
             "full_name": "Test User",
-            "password": "TestPass123"
+            "password": "TestPass123",
         }
 
         response = client.post("/api/v1/auth/register", json=user_data)
@@ -59,7 +61,7 @@ class TestAuth:
             "email": "invalid-email",
             "username": "testuser",
             "full_name": "Test User",
-            "password": "TestPass123"
+            "password": "TestPass123",
         }
 
         response = client.post("/api/v1/auth/register", json=user_data)
@@ -71,7 +73,7 @@ class TestAuth:
             "email": "test@example.com",
             "username": "testuser",
             "full_name": "Test User",
-            "password": "weak"
+            "password": "weak",
         }
 
         response = client.post("/api/v1/auth/register", json=user_data)
@@ -84,15 +86,12 @@ class TestAuth:
             "email": "login@example.com",
             "username": "loginuser",
             "full_name": "Login User",
-            "password": "TestPass123"
+            "password": "TestPass123",
         }
         client.post("/api/v1/auth/register", json=user_data)
 
         # Then login
-        login_data = {
-            "username": "login@example.com",
-            "password": "TestPass123"
-        }
+        login_data = {"username": "login@example.com", "password": "TestPass123"}
 
         response = client.post("/api/v1/auth/login", data=login_data)
         assert response.status_code == 200
@@ -105,7 +104,7 @@ class TestAuth:
         """Test user login with invalid credentials"""
         login_data = {
             "username": "nonexistent@example.com",
-            "password": "wrongpassword"
+            "password": "wrongpassword",
         }
 
         response = client.post("/api/v1/auth/login", data=login_data)
@@ -118,7 +117,7 @@ class TestAuth:
             "email": "current@example.com",
             "username": "currentuser",
             "full_name": "Current User",
-            "password": "TestPass123"
+            "password": "TestPass123",
         }
         register_response = client.post("/api/v1/auth/register", json=user_data)
         token = register_response.json()["access_token"]

@@ -6,6 +6,9 @@ import socket,
 from pathlib import Path,
 
 
+
+
+
 #!/usr/bin/env python3
 """"
 EHB-5 Dashboard Server,
@@ -22,6 +25,9 @@ return port,
 except OSError:
 continue,
 return None,
+
+
+
 def start_dashboard() -> None::
 """Start the EHB-5 dashboard server"""
 

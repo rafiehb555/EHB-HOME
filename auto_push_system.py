@@ -1,9 +1,3 @@
-#!/usr/bin/env python3
-"""
-EHB Home Page - Auto Push System
-Automatically pushes data to GitHub repository when tests are completed
-"""
-
 import os
 import sys
 import json
@@ -14,6 +8,17 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 import logging
+
+            from quick_test import test_basic_functionality
+            import requests
+
+
+
+#!/usr/bin/env python3
+"""
+EHB Home Page - Auto Push System
+Automatically pushes data to GitHub repository when tests are completed
+"""
 
 # Configure logging
 logging.basicConfig(
@@ -42,6 +47,12 @@ class AutoPushSystem:
 
         # Initialize git if needed
         self._init_git()
+
+
+
+
+
+
 
     def _init_git(self):
         """Initialize git repository if not already initialized"""
@@ -268,6 +279,9 @@ class AutoPushSystem:
         self.auto_push_enabled = False
         logger.info("Auto-push system disabled")
 
+
+
+
     def get_status(self) -> Dict[str, Any]:
         """Get auto-push system status"""
         return {
@@ -280,6 +294,9 @@ class AutoPushSystem:
 
 class TestAutoPush:
     """Test class that automatically pushes results"""
+
+
+
 
     def __init__(self):
         self.auto_push = AutoPushSystem()
@@ -355,6 +372,9 @@ def disable_auto_push():
     """Disable auto-push system"""
     auto_push_system.disable_auto_push()
 
+
+
+
 def get_auto_push_status():
     """Get auto-push system status"""
     return auto_push_system.get_status()
@@ -368,7 +388,6 @@ async def test_api_integrations():
     async def test_basic_functionality():
         try:
             # Import test
-            from quick_test import test_basic_functionality
             result = await test_basic_functionality()
             return {"success": True, "details": "Basic functionality test passed"}
         except Exception as e:
@@ -378,7 +397,6 @@ async def test_api_integrations():
     async def test_api_connections():
         try:
             # Test API connections
-            import requests
             response = requests.get("https://api.github.com")
             return {"success": response.status_code == 200, "details": f"GitHub API status: {response.status_code}"}
         except Exception as e:

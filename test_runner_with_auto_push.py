@@ -1,9 +1,3 @@
-#!/usr/bin/env python3
-"""
-EHB Home Page - Test Runner with Auto Push
-Automatically runs tests and pushes results to GitHub
-"""
-
 import asyncio
 import time
 from datetime import datetime
@@ -11,6 +5,21 @@ from typing import Dict, Any, List
 import logging
 
 from auto_push_system import AutoPushSystem, TestAutoPush
+
+            import sys
+            import os
+            import json
+
+            import os
+            from dotenv import load_dotenv
+
+
+
+#!/usr/bin/env python3
+"""
+EHB Home Page - Test Runner with Auto Push
+Automatically runs tests and pushes results to GitHub
+"""
 
 # Configure logging
 logging.basicConfig(
@@ -21,6 +30,9 @@ logger = logging.getLogger(__name__)
 
 class TestRunnerWithAutoPush:
     """Test runner that automatically pushes results to GitHub"""
+
+
+
 
     def __init__(self):
         self.auto_push = AutoPushSystem()
@@ -79,10 +91,6 @@ class TestRunnerWithAutoPush:
         """Test basic functionality"""
         try:
             # Test imports
-            import sys
-            import os
-            import json
-
             # Test file operations
             test_data = {"test": "data", "timestamp": datetime.now().isoformat()}
             with open("test_output.json", "w") as f:
@@ -152,8 +160,6 @@ class TestRunnerWithAutoPush:
         """Test database connections"""
         try:
             # Test environment variables
-            import os
-            from dotenv import load_dotenv
             load_dotenv()
 
             required_env_vars = [

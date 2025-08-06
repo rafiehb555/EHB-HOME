@@ -1,33 +1,34 @@
-#!/usr/bin/env python3
-"""
-Create EHB Database Schema
-"""
-
 import os
 import sys
 from sqlalchemy import create_engine, text
-
-# Add the parent directory to the path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from models.base import Base
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 
-# Create engine with the correct URL
-engine = create_engine(
-    "postgresql://ehb_user:postgres@localhost:5433/ehb_database",
-    echo=False
-)
-
-# Create SessionLocal with the correct engine
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 from models.user import User
 from models.service import Service, ServiceType, ServiceStatus
 from models.transaction import Transaction
 from models.wallet import Wallet
 from models.franchise import Franchise
 from models.verification import Verification
+
+
+#!/usr/bin/env python3
+"""
+Create EHB Database Schema
+"""
+
+# Add the parent directory to the path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# Create engine with the correct URL
+engine = create_engine(
+    "postgresql://ehb_user:postgres@localhost:5433/ehb_database", echo=False
+)
+
+# Create SessionLocal with the correct engine
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
 def create_schema():
@@ -70,7 +71,7 @@ def insert_services():
                 "usage_limit": 1000,
                 "endpoint_url": "http://pss:4001",
                 "icon_url": "/static/icons/pss.png",
-                "documentation_url": "https://docs.ehb.com/pss"
+                "documentation_url": "https://docs.ehb.com/pss",
             },
             {
                 "name": "Easy Management Office",
@@ -82,7 +83,7 @@ def insert_services():
                 "usage_limit": 2000,
                 "endpoint_url": "http://emo:4003",
                 "icon_url": "/static/icons/emo.png",
-                "documentation_url": "https://docs.ehb.com/emo"
+                "documentation_url": "https://docs.ehb.com/emo",
             },
             {
                 "name": "Exam Decision Registration",
@@ -94,7 +95,7 @@ def insert_services():
                 "usage_limit": 1500,
                 "endpoint_url": "http://edr:4002",
                 "icon_url": "/static/icons/edr.png",
-                "documentation_url": "https://docs.ehb.com/edr"
+                "documentation_url": "https://docs.ehb.com/edr",
             },
             {
                 "name": "Job Profile System",
@@ -106,7 +107,7 @@ def insert_services():
                 "usage_limit": 1000,
                 "endpoint_url": "http://jps:4005",
                 "icon_url": "/static/icons/jps.png",
-                "documentation_url": "https://docs.ehb.com/jps"
+                "documentation_url": "https://docs.ehb.com/jps",
             },
             {
                 "name": "GoSellr E-commerce",
@@ -118,8 +119,8 @@ def insert_services():
                 "usage_limit": 5000,
                 "endpoint_url": "http://gosellr:4004",
                 "icon_url": "/static/icons/gosellr.png",
-                "documentation_url": "https://docs.ehb.com/gosellr"
-            }
+                "documentation_url": "https://docs.ehb.com/gosellr",
+            },
         ]
 
         for service_data in services_data:

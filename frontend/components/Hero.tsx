@@ -1,33 +1,33 @@
-import React from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, Shield, Zap, Users, Globe } from 'lucide-react';
+import { ArrowRight, Globe, Shield, Users, Zap } from 'lucide-react';
+import React from 'react';
+
+const features = [
+  {
+    icon: <Shield className="w-8 h-8" />,
+    title: "Secure Verification",
+    description: "Advanced identity verification and KYC processing"
+  },
+  {
+    icon: <Users className="w-8 h-8" />,
+    title: "User Management",
+    description: "Complete user lifecycle and permission management"
+  },
+  {
+    icon: <Zap className="w-8 h-8" />,
+    title: "AI Integration",
+    description: "Smart automation and intelligent decision making"
+  },
+  {
+    icon: <Globe className="w-8 h-8" />,
+    title: "Global Access",
+    description: "Worldwide deployment and multi-region support"
+  }
+];
 
 const Hero: React.FC = () => {
-  const features = [
-    {
-      icon: <Shield className="w-6 h-6" />,
-      title: 'Secure Verification',
-      description: 'PSS, EMO, and EDR verification systems'
-    },
-    {
-      icon: <Zap className="w-6 h-6" />,
-      title: 'Fast Transactions',
-      description: 'Blockchain-powered wallet and payments'
-    },
-    {
-      icon: <Users className="w-6 h-6" />,
-      title: 'Business Solutions',
-      description: 'GoSellr e-commerce and franchise management'
-    },
-    {
-      icon: <Globe className="w-6 h-6" />,
-      title: 'Global Access',
-      description: 'Complete ecosystem for modern businesses'
-    }
-  ];
-
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700">
+    <section className="relative min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 flex items-center justify-center overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-black/10">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20"></div>

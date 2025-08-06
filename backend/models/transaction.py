@@ -1,16 +1,28 @@
-"""
-Transaction Model for EHB System
-"""
-
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, Enum, Float, ForeignKey
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Boolean,
+    DateTime,
+    Text,
+    Enum,
+    Float,
+    ForeignKey,
+)
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 import enum
 from .base import Base
 
 
+"""
+Transaction Model for EHB System
+"""
+
+
 class TransactionType(enum.Enum):
     """Transaction types"""
+
     DEPOSIT = "deposit"
     WITHDRAWAL = "withdrawal"
     TRANSFER = "transfer"
@@ -22,6 +34,7 @@ class TransactionType(enum.Enum):
 
 class TransactionStatus(enum.Enum):
     """Transaction status"""
+
     PENDING = "pending"
     COMPLETED = "completed"
     FAILED = "failed"
@@ -30,6 +43,7 @@ class TransactionStatus(enum.Enum):
 
 class Transaction(Base):
     """Transaction model for EHB system"""
+
     __tablename__ = "transactions"
 
     id = Column(Integer, primary_key=True, index=True)

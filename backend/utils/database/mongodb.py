@@ -1,12 +1,19 @@
-"""
-MongoDB Configuration for EHB Backend
-"""
-
 import os
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo import MongoClient
 from typing import Optional
 from dotenv import load_dotenv
+
+        from bson import ObjectId
+        from bson import ObjectId
+        from bson import ObjectId
+        from bson import ObjectId
+
+
+
+"""
+MongoDB Configuration for EHB Backend
+"""
 
 load_dotenv()
 
@@ -68,6 +75,9 @@ def get_database():
     return None
 
 
+
+
+
 def get_collection(collection_name: str):
     """Get collection instance"""
     db = get_database()
@@ -90,7 +100,6 @@ async def get_user(user_id: str):
     """Get user by ID"""
     collection = get_collection("users")
     if collection:
-        from bson import ObjectId
         user = await collection.find_one({"_id": ObjectId(user_id)})
         return user
     return None
@@ -109,7 +118,6 @@ async def update_user(user_id: str, update_data: dict):
     """Update user"""
     collection = get_collection("users")
     if collection:
-        from bson import ObjectId
         result = await collection.update_one(
             {"_id": ObjectId(user_id)},
             {"$set": update_data}
@@ -140,7 +148,6 @@ async def get_service(service_id: str):
     """Get service by ID"""
     collection = get_collection("services")
     if collection:
-        from bson import ObjectId
         service = await collection.find_one({"_id": ObjectId(service_id)})
         return service
     return None
@@ -150,7 +157,6 @@ async def update_service(service_id: str, update_data: dict):
     """Update service"""
     collection = get_collection("services")
     if collection:
-        from bson import ObjectId
         result = await collection.update_one(
             {"_id": ObjectId(service_id)},
             {"$set": update_data}

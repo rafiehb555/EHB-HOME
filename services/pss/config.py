@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     PORT: int = 4001
 
     # Database Configuration
-    DATABASE_URL: str = "postgresql://postgres:ehb_password@localhost:5432/ehb_database"
+    DATABASE_URL: str = "postgresql://ehb_user:ehb_password@localhost:5432/ehb_database"
 
     # JWT Configuration
     SECRET_KEY: str = "ehb-pss-secret-key-change-in-production"
@@ -60,6 +60,8 @@ settings = Settings()
 
 
 # Ensure upload directory exists
+
+
 def ensure_upload_dir():
     """Ensure upload directory exists"""
     os.makedirs(settings.UPLOAD_DIR, exist_ok=True)

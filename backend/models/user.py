@@ -1,7 +1,3 @@
-"""
-User Model for EHB System
-"""
-
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, Enum
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
@@ -9,8 +5,14 @@ import enum
 from .base import Base
 
 
+"""
+User Model for EHB System
+"""
+
+
 class UserLevel(enum.Enum):
     """User SQL levels"""
+
     FREE = "free"
     BASIC = "basic"
     NORMAL = "normal"
@@ -20,6 +22,7 @@ class UserLevel(enum.Enum):
 
 class UserStatus(enum.Enum):
     """User status"""
+
     ACTIVE = "active"
     INACTIVE = "inactive"
     SUSPENDED = "suspended"
@@ -28,6 +31,7 @@ class UserStatus(enum.Enum):
 
 class User(Base):
     """User model for EHB system"""
+
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)

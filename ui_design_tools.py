@@ -1,9 +1,3 @@
-#!/usr/bin/env python3
-"""
-EHB Home Page - UI Design Tools
-Convert UI design images to React components
-"""
-
 import os
 import sys
 import base64
@@ -13,13 +7,27 @@ from typing import Dict, Any, List, Optional
 from PIL import Image
 import io
 
+from backend.api_integrations import service_manager, Config
+
+    import argparse
+
+
+
+
+#!/usr/bin/env python3
+"""
+EHB Home Page - UI Design Tools
+Convert UI design images to React components
+"""
+
 # Add the backend directory to the path
 sys.path.append(os.path.join(os.path.dirname(__file__), 'backend'))
 
-from backend.api_integrations import service_manager, Config
-
 class UIDesignAnalyzer:
     """Analyze UI design images and generate React components"""
+
+
+
 
     def __init__(self):
         self.ai_service = service_manager.ai
@@ -261,6 +269,9 @@ module.exports = {json.dumps(config, indent=2)}
 class DesignSystemGenerator:
     """Generate a complete design system from multiple images"""
 
+
+
+
     def __init__(self):
         self.analyzer = UIDesignAnalyzer()
 
@@ -406,8 +417,6 @@ async def main():
         print("3. Or run: python ui_design_tools.py --generate-system <directory>")
 
 if __name__ == "__main__":
-    import argparse
-
     parser = argparse.ArgumentParser(description="EHB UI Design Tools")
     parser.add_argument("--analyze", help="Analyze a single design image")
     parser.add_argument("--generate-system", help="Generate design system from directory")

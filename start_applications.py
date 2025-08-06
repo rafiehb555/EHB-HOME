@@ -1,9 +1,3 @@
-#!/usr/bin/env python3
-"""
-EHB Applications Auto-Start Script
-Automatically starts frontend and backend servers and opens them in browser
-"""
-
 import subprocess
 import time
 import webbrowser
@@ -12,16 +6,28 @@ import sys
 from pathlib import Path
 
 
+        import socket
+
+
+
+#!/usr/bin/env python3
+"""
+EHB Applications Auto-Start Script
+Automatically starts frontend and backend servers and opens them in browser
+"""
+
 def check_port(port):
     """Check if a port is in use"""
     try:
-        import socket
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         result = sock.connect_ex(('localhost', port))
         sock.close()
         return result == 0
     except:
         return False
+
+
+
 
 
 def wait_for_server(port, timeout=30):

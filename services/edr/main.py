@@ -9,9 +9,10 @@ from backend.models.database.connection import create_tables
 from backend.services.auth.auth import get_current_user
 from models import Course, Assessment, Quiz, Progress
 
-# Import API routers
 from api import courses, assessments, quizzes, progress
 
+
+# Import API routers
 # Security scheme
 security = HTTPBearer()
 
@@ -23,16 +24,16 @@ async def lifespan(app: FastAPI):
     print(f"🚀 Starting {settings.SERVICE_NAME} v{settings.SERVICE_VERSION}")
     print(f"📊 Database: {settings.DATABASE_URL}")
     print(f"🔐 Port: {settings.PORT}")
-    
+
     # Create database tables
     try:
         create_tables()
         print("✅ Database tables created successfully")
     except Exception as e:
         print(f"❌ Database setup failed: {e}")
-    
+
     yield
-    
+
     # Shutdown
     print(f"🛑 Shutting down {settings.SERVICE_NAME}")
 
@@ -42,7 +43,7 @@ app = FastAPI(
     title=settings.SERVICE_NAME,
     version=settings.SERVICE_VERSION,
     description="EDR Service - Skill Testing & Assessment System",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 # Add CORS middleware
@@ -68,7 +69,7 @@ async def root():
         "service": settings.SERVICE_NAME,
         "version": settings.SERVICE_VERSION,
         "status": "running",
-        "docs": "/docs"
+        "docs": "/docs",
     }
 
 
@@ -78,12 +79,12 @@ async def health_check():
     return {
         "status": "healthy",
         "service": settings.SERVICE_NAME,
-        "version": settings.SERVICE_VERSION
+        "version": settings.SERVICE_VERSION,
     }
 
 
 @app.get("/api/v1/status")
-async def service_status(current_user = Depends(get_current_user)):
+async def service_status(current_user=Depends(get_current_user)):
     """Get service status (requires authentication)"""
     return {
         "service": settings.SERVICE_NAME,
@@ -92,8 +93,8 @@ async def service_status(current_user = Depends(get_current_user)):
         "user": {
             "id": current_user.id,
             "email": current_user.email,
-            "username": current_user.username
-        }
+            "username": current_user.username,
+        },
     }
 
 
@@ -103,5 +104,5 @@ if __name__ == "__main__":
         host=settings.HOST,
         port=settings.PORT,
         reload=settings.DEBUG,
-        log_level="info"
+        log_level="info",
     )

@@ -1,16 +1,28 @@
-"""
-Wallet Model for EHB System
-"""
-
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, Enum, Float, ForeignKey
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Boolean,
+    DateTime,
+    Text,
+    Enum,
+    Float,
+    ForeignKey,
+)
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 import enum
 from .base import Base
 
 
+"""
+Wallet Model for EHB System
+"""
+
+
 class WalletType(enum.Enum):
     """Wallet types"""
+
     HOT = "hot"
     COLD = "cold"
     MULTISIG = "multisig"
@@ -18,6 +30,7 @@ class WalletType(enum.Enum):
 
 class WalletStatus(enum.Enum):
     """Wallet status"""
+
     ACTIVE = "active"
     INACTIVE = "inactive"
     LOCKED = "locked"
@@ -26,6 +39,7 @@ class WalletStatus(enum.Enum):
 
 class Wallet(Base):
     """Wallet model for EHB system"""
+
     __tablename__ = "wallets"
 
     id = Column(Integer, primary_key=True, index=True)

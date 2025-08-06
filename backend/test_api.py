@@ -1,11 +1,16 @@
+import requests
+import json
+from datetime import datetime
+
+        from sqlalchemy import create_engine, text
+
+
+
+
 #!/usr/bin/env python3
 """
 Test API Endpoints
 """
-
-import requests
-import json
-from datetime import datetime
 
 def test_api_endpoints():
     """Test all API endpoints"""
@@ -115,8 +120,6 @@ def test_database_connection():
     print("\n🔍 Testing Database Connection...")
 
     try:
-        from sqlalchemy import create_engine, text
-
         # Create engine with the correct URL
         engine = create_engine(
             "postgresql://ehb_user:postgres@localhost:5433/ehb_database",

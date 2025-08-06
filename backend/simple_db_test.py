@@ -1,3 +1,9 @@
+        from utils.database.connection import test_connection, engine
+        from sqlalchemy import text
+
+
+
+
 #!/usr/bin/env python3
 """
 Simple Database Test
@@ -6,9 +12,6 @@ Simple Database Test
 def test_db():
     try:
         print("Testing database connection...")
-        from utils.database.connection import test_connection, engine
-        from sqlalchemy import text
-
         # Test connection
         if test_connection():
             print("✅ Connection successful")
