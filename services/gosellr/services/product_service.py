@@ -25,7 +25,7 @@ class ProductService:
             images=product_data.get("images", []),
             specifications=product_data.get("specifications", {}),
             tags=product_data.get("tags", []),
-            status=ProductStatus.DRAFT
+            status=ProductStatus.DRAFT,
         )
 
         self.db.add(product)
@@ -37,10 +37,13 @@ class ProductService:
         """Get product by ID"""
         return self.db.query(Product).filter(Product.id == product_id).first()
 
-    def get_seller_products(self, seller_id: int,
-                          status: Optional[ProductStatus] = None,
-                          limit: int = 50,
-                          offset: int = 0) -> List[Product]:
+    def get_seller_products(
+        self,
+        seller_id: int,
+        status: Optional[ProductStatus] = None,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> List[Product]:
         """Get all products for a seller"""
         query = self.db.query(Product).filter(Product.seller_id == seller_id)
 
@@ -49,13 +52,15 @@ class ProductService:
 
         return query.offset(offset).limit(limit).all()
 
-    def get_products(self,
-                    category: Optional[ProductCategory] = None,
-                    status: Optional[ProductStatus] = None,
-                    min_price: Optional[float] = None,
-                    max_price: Optional[float] = None,
-                    limit: int = 50,
-                    offset: int = 0) -> List[Product]:
+    def get_products(
+        self,
+        category: Optional[ProductCategory] = None,
+        status: Optional[ProductStatus] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> List[Product]:
         """Get products with filters"""
         query = self.db.query(Product)
 
@@ -70,7 +75,9 @@ class ProductService:
 
         return query.offset(offset).limit(limit).all()
 
-    def update_product(self, product_id: int, update_data: Dict[str, Any]) -> Optional[Product]:
+    def update_product(
+        self, product_id: int, update_data: Dict[str, Any]
+    ) -> Optional[Product]:
         """Update product information"""
         product = self.get_product(product_id)
         if not product:
@@ -95,7 +102,9 @@ class ProductService:
         try:
             # Validate product before publishing
             if not self._validate_product_for_publishing(product):
-                return {"error": "Product validation failed. Please complete all required fields."}
+                return {
+                    "error": "Product validation failed. Please complete all required fields."
+                }
 
             product.status = ProductStatus.ACTIVE
             product.published_at = datetime.utcnow()
@@ -107,7 +116,7 @@ class ProductService:
                 "success": True,
                 "product_id": product.id,
                 "status": "published",
-                "published_at": product.published_at.isoformat()
+                "published_at": product.published_at.isoformat(),
             }
 
         except Exception as e:
@@ -115,9 +124,7 @@ class ProductService:
 
     def _validate_product_for_publishing(self, product: Product) -> bool:
         """Validate product before publishing"""
-        required_fields = [
-            "name", "description", "category", "price", "seller_id"
-        ]
+        required_fields = ["name", "description", "category", "price", "seller_id"]
 
         for field in required_fields:
             if not getattr(product, field):
@@ -151,7 +158,7 @@ class ProductService:
                 "success": True,
                 "product_id": product.id,
                 "new_stock": new_quantity,
-                "status": product.status.value
+                "status": product.status.value,
             }
 
         except Exception as e:
@@ -177,21 +184,28 @@ class ProductService:
         total_products = query.count()
         active_products = query.filter(Product.status == ProductStatus.ACTIVE).count()
         draft_products = query.filter(Product.status == ProductStatus.DRAFT).count()
-        out_of_stock_products = query.filter(Product.status == ProductStatus.OUT_OF_STOCK).count()
+        out_of_stock_products = query.filter(
+            Product.status == ProductStatus.OUT_OF_STOCK
+        ).count()
 
         return {
             "total": total_products,
             "active": active_products,
             "draft": draft_products,
-            "out_of_stock": out_of_stock_products
+            "out_of_stock": out_of_stock_products,
         }
 
     def search_products(self, search_term: str, limit: int = 20) -> List[Product]:
         """Search products by name or description"""
-        return self.db.query(Product).filter(
-            Product.name.ilike(f"%{search_term}%") |
-            Product.description.ilike(f"%{search_term}%")
-        ).limit(limit).all()
+        return (
+            self.db.query(Product)
+            .filter(
+                Product.name.ilike(f"%{search_term}%")
+                | Product.description.ilike(f"%{search_term}%")
+            )
+            .limit(limit)
+            .all()
+        )
 
     def archive_product(self, product_id: int) -> Dict[str, Any]:
         """Archive a product"""
@@ -205,11 +219,7 @@ class ProductService:
 
             self.db.commit()
 
-            return {
-                "success": True,
-                "product_id": product.id,
-                "status": "archived"
-            }
+            return {"success": True, "product_id": product.id, "status": "archived"}
 
         except Exception as e:
             return {"error": f"Archiving failed: {str(e)}"}

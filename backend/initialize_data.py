@@ -1,18 +1,15 @@
-import sys
 import os
+import sys
 from datetime import datetime
-from sqlalchemy.orm import Session
-from utils.database.connection import SessionLocal, engine
+
+from models.database.service import Service, ServiceStatus, ServiceType
+from models.database.transaction import (Transaction, TransactionStatus,
+                                         TransactionType, Wallet)
 from models.database.user import User, UserLevel
-from models.database.service import Service, ServiceType, ServiceStatus
-from models.database.transaction import Transaction, TransactionType, TransactionStatus
-from models.database.transaction import Wallet
+from sqlalchemy.orm import Session
+from utils.database.connection import SessionLocal, engine, test_connection
+
 from services.auth.jwt import get_password_hash
-
-
-        from utils.database.connection import test_connection
-
-
 
 #!/usr/bin/env python3
 """

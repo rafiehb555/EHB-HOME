@@ -1,13 +1,14 @@
-from sqlalchemy.orm import Session
-from sqlalchemy import and_, or_
-from typing import List, Optional, Dict, Any
 import os
 import uuid
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 from config import settings
-from models.business import Business, BusinessType, BusinessStatus, BusinessCategory
+from models.business import (Business, BusinessCategory, BusinessStatus,
+                             BusinessType)
 from models.company_profile import CompanyProfile, CompanySize, IndustryType
+from sqlalchemy import and_, or_
+from sqlalchemy.orm import Session
 
 
 class BusinessService:

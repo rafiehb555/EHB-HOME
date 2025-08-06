@@ -1,15 +1,13 @@
-import sys
 import os
-from backend.utils.database.connection import test_connection, create_tables
-from backend.models.database.user import User
+import sys
+
+from sqlalchemy.orm import Session
+
 from backend.models.database.service import Service, ServiceLog
 from backend.models.database.transaction import Transaction, Wallet
-
-            from sqlalchemy.orm import Session
-            from backend.utils.database.connection import SessionLocal
-
-
-
+from backend.models.database.user import User
+from backend.utils.database.connection import (SessionLocal, create_tables,
+                                               test_connection)
 
 #!/usr/bin/env python3
 """

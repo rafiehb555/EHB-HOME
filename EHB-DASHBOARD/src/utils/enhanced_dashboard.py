@@ -1,14 +1,11 @@
-import json,
-import os,
-import time,
-import webbrowser,
-from datetime import datetime,
-from typing import Any, Dict, List,
-import psutil,
+import json
+import os
+import time
+import webbrowser
+from datetime import datetime
+from typing import Any, Dict, List
 
-
-
-
+import psutil
 
 #!/usr/bin/env python3
 """"

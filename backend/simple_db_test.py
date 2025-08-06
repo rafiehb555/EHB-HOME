@@ -1,5 +1,5 @@
-        from utils.database.connection import test_connection, engine
         from sqlalchemy import text
+        from utils.database.connection import engine, test_connection
 
 
 

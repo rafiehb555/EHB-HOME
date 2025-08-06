@@ -1,18 +1,13 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
 import os
+
 from dotenv import load_dotenv
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 
-    from .user import User
-    from .service import Service, UserService
-    from .transaction import Transaction, Wallet
-
-        from .user import User, UserLevel
-        from .service import Service, ServiceType, ServiceStatus
-
-
-
+from .service import Service, ServiceStatus, ServiceType, UserService
+from .transaction import Transaction, Wallet
+from .user import User, UserLevel
 
 load_dotenv()
 

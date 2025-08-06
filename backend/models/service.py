@@ -1,9 +1,11 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, Enum, Float
-from sqlalchemy.sql import func
-from sqlalchemy.orm import relationship
 import enum
-from .base import Base
 
+from sqlalchemy import (Boolean, Column, DateTime, Enum, Float, Integer,
+                        String, Text)
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
+
+from .base import Base
 
 """
 Service Model for EHB System

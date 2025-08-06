@@ -26,7 +26,7 @@ class CourseService:
             thumbnail_url=course_data.get("thumbnail_url"),
             prerequisites=course_data.get("prerequisites", []),
             learning_objectives=course_data.get("learning_objectives", []),
-            status=CourseStatus.DRAFT
+            status=CourseStatus.DRAFT,
         )
 
         self.db.add(course)
@@ -38,12 +38,14 @@ class CourseService:
         """Get course by ID"""
         return self.db.query(Course).filter(Course.id == course_id).first()
 
-    def get_courses(self,
-                   category: Optional[CourseCategory] = None,
-                   level: Optional[CourseLevel] = None,
-                   status: Optional[CourseStatus] = None,
-                   limit: int = 50,
-                   offset: int = 0) -> List[Course]:
+    def get_courses(
+        self,
+        category: Optional[CourseCategory] = None,
+        level: Optional[CourseLevel] = None,
+        status: Optional[CourseStatus] = None,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> List[Course]:
         """Get courses with filters"""
         query = self.db.query(Course)
 
@@ -56,7 +58,9 @@ class CourseService:
 
         return query.offset(offset).limit(limit).all()
 
-    def update_course(self, course_id: int, update_data: Dict[str, Any]) -> Optional[Course]:
+    def update_course(
+        self, course_id: int, update_data: Dict[str, Any]
+    ) -> Optional[Course]:
         """Update course information"""
         course = self.get_course(course_id)
         if not course:
@@ -81,7 +85,9 @@ class CourseService:
         try:
             # Validate course before publishing
             if not self._validate_course_for_publishing(course):
-                return {"error": "Course validation failed. Please complete all required fields."}
+                return {
+                    "error": "Course validation failed. Please complete all required fields."
+                }
 
             course.status = CourseStatus.PUBLISHED
             course.published_at = datetime.utcnow()
@@ -93,7 +99,7 @@ class CourseService:
                 "success": True,
                 "course_id": course.id,
                 "status": "published",
-                "published_at": course.published_at.isoformat()
+                "published_at": course.published_at.isoformat(),
             }
 
         except Exception as e:
@@ -101,9 +107,7 @@ class CourseService:
 
     def _validate_course_for_publishing(self, course: Course) -> bool:
         """Validate course before publishing"""
-        required_fields = [
-            "title", "description", "category", "level", "instructor_id"
-        ]
+        required_fields = ["title", "description", "category", "level", "instructor_id"]
 
         for field in required_fields:
             if not getattr(course, field):
@@ -130,22 +134,29 @@ class CourseService:
 
         total_courses = query.count()
         draft_courses = query.filter(Course.status == CourseStatus.DRAFT).count()
-        published_courses = query.filter(Course.status == CourseStatus.PUBLISHED).count()
+        published_courses = query.filter(
+            Course.status == CourseStatus.PUBLISHED
+        ).count()
         archived_courses = query.filter(Course.status == CourseStatus.ARCHIVED).count()
 
         return {
             "total": total_courses,
             "draft": draft_courses,
             "published": published_courses,
-            "archived": archived_courses
+            "archived": archived_courses,
         }
 
     def search_courses(self, search_term: str, limit: int = 20) -> List[Course]:
         """Search courses by title or description"""
-        return self.db.query(Course).filter(
-            Course.title.ilike(f"%{search_term}%") |
-            Course.description.ilike(f"%{search_term}%")
-        ).limit(limit).all()
+        return (
+            self.db.query(Course)
+            .filter(
+                Course.title.ilike(f"%{search_term}%")
+                | Course.description.ilike(f"%{search_term}%")
+            )
+            .limit(limit)
+            .all()
+        )
 
     def get_courses_by_instructor(self, instructor_id: int) -> List[Course]:
         """Get all courses by an instructor"""
@@ -163,11 +174,7 @@ class CourseService:
 
             self.db.commit()
 
-            return {
-                "success": True,
-                "course_id": course.id,
-                "status": "archived"
-            }
+            return {"success": True, "course_id": course.id, "status": "archived"}
 
         except Exception as e:
             return {"error": f"Archiving failed: {str(e)}"}

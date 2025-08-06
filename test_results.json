@@ -1,10 +1,10 @@
 {
   "main_backend": {
     "status": "healthy",
-    "response_time": 2044.086,
+    "response_time": 2032.781,
     "data": {
       "status": "healthy",
-      "timestamp": "2025-08-06T07:27:25.522585",
+      "timestamp": "2025-08-06T08:00:06.170148",
       "services": {
         "pss": {
           "status": "ready",
@@ -73,28 +73,28 @@
   "frontend": {
     "status": "error",
     "error": "HTTP 404",
-    "response_time": 11.563
+    "response_time": 12.576
   },
   "main_backend_endpoints": {
     "health": {
       "status": "success",
       "status_code": 200,
-      "response_time": 2015.389
+      "response_time": 2034.29
     },
     "services": {
       "status": "success",
       "status_code": 200,
-      "response_time": 2036.775
+      "response_time": 2054.577
     },
     "dashboard": {
       "status": "success",
       "status_code": 200,
-      "response_time": 2040.4650000000001
+      "response_time": 2055.424
     },
     "stats": {
       "status": "success",
       "status_code": 200,
-      "response_time": 2053.178
+      "response_time": 2039.8719999999998
     }
   },
   "frontend_pages": {
@@ -119,8 +119,8 @@
     "healthy_services": 1,
     "unhealthy_services": 5,
     "health_percentage": 16.666666666666664,
-    "average_response_time": 2044.086,
-    "test_duration": 26.832316,
-    "timestamp": "2025-08-06T12:27:50.308855"
+    "average_response_time": 2032.781,
+    "test_duration": 26.559344,
+    "timestamp": "2025-08-06T13:00:30.695314"
   }
 }

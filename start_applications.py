@@ -1,14 +1,10 @@
+import os
+import socket
 import subprocess
+import sys
 import time
 import webbrowser
-import os
-import sys
 from pathlib import Path
-
-
-        import socket
-
-
 
 #!/usr/bin/env python3
 """

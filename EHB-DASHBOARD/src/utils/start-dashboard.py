@@ -1,13 +1,9 @@
-import http.server,
-import socketserver,
-import webbrowser,
-import os,
-import socket,
-from pathlib import Path,
-
-
-
-
+import http.server
+import os
+import socket
+import socketserver
+import webbrowser
+from pathlib import Path
 
 #!/usr/bin/env python3
 """"

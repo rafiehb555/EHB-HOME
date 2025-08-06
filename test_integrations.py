@@ -2,10 +2,9 @@ import asyncio
 import os
 import sys
 from datetime import datetime
-from typing import Dict, Any
+from typing import Any, Dict
 
-from backend.api_integrations import service_manager, Config
-
+from backend.api_integrations import Config, service_manager
 
 #!/usr/bin/env python3
 """
@@ -264,9 +263,7 @@ class IntegrationTester:
                 )
                 results["postgres_query"] = len(query_result) > 0
 
-            print(
-                f"✅ Database Services: {sum(results.values())}/{len(results)} passed"
-            )
+            print(f"✅ Database Services: {sum(results.values())}/{len(results)} passed")
 
         except Exception as e:
             print(f"❌ Database Services failed: {str(e)}")
@@ -324,7 +321,9 @@ class IntegrationTester:
             status = (
                 "✅ PASS"
                 if service_passed == service_total
-                else "⚠️  PARTIAL" if service_passed > 0 else "❌ FAIL"
+                else "⚠️  PARTIAL"
+                if service_passed > 0
+                else "❌ FAIL"
             )
 
             report_lines.append(f"{service_name.replace('_', ' ').title()}: {status}")
@@ -339,7 +338,9 @@ class IntegrationTester:
         overall_status = (
             "✅ ALL PASSED"
             if passed_tests == total_tests
-            else "⚠️  PARTIAL" if passed_tests > 0 else "❌ ALL FAILED"
+            else "⚠️  PARTIAL"
+            if passed_tests > 0
+            else "❌ ALL FAILED"
         )
         report_lines.append("=" * 50)
         report_lines.append(f"Overall Status: {overall_status}")

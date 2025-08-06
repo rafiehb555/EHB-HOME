@@ -1,7 +1,7 @@
-from sqlalchemy.orm import Session
 from typing import Generator
-from models.base import SessionLocal
 
+from models.base import SessionLocal
+from sqlalchemy.orm import Session
 
 """
 Database utilities for EHB system

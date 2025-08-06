@@ -1,8 +1,7 @@
+import os
 import subprocess
 import sys
-import os
 from pathlib import Path
-
 
 #!/usr/bin/env python3
 """

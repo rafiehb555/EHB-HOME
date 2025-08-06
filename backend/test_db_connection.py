@@ -1,10 +1,7 @@
-import psycopg2
 import os
 
-        from sqlalchemy import create_engine, text
-
-
-
+import psycopg2
+from sqlalchemy import create_engine, text
 
 #!/usr/bin/env python3
 """

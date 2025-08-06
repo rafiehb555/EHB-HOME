@@ -1,7 +1,7 @@
-import requests
 import json
 import time
 
+import requests
 
 #!/usr/bin/env python3
 """

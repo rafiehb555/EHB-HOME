@@ -1,14 +1,15 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import HTTPBearer
-from sqlalchemy.orm import Session
-from pydantic import BaseModel, EmailStr
 from typing import Optional
 
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import HTTPBearer
 from models.database.connection import get_db
-from services.auth.auth import auth_service, get_current_user, get_current_active_user
-from services.auth.jwt import create_tokens, refresh_access_token
 from models.database.user import User
+from pydantic import BaseModel, EmailStr
+from sqlalchemy.orm import Session
 
+from services.auth.auth import (auth_service, get_current_active_user,
+                                get_current_user)
+from services.auth.jwt import create_tokens, refresh_access_token
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 security = HTTPBearer()

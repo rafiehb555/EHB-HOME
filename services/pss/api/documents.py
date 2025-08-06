@@ -5,24 +5,15 @@ from typing import List, Optional
 
 from config import settings
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
-from models.kyc_document import (
-from services.document_service import DocumentService
-from sqlalchemy.orm import Session
+from models.kyc_document import (DocumentResponse, DocumentService,
+                                 DocumentStatus, DocumentType,
+                                 DocumentUpdateRequest, DocumentUploadRequest,
+                                 KYCDocument, Session,
+                                 backend.models.database.connection,
+                                 backend.services.auth.auth, from,
+                                 get_current_user, get_db, import, json,
+                                 services.document_service, sqlalchemy.orm)
 
-from backend.models.database.connection import get_db
-from backend.services.auth.auth import get_current_user
-
-                import json
-
-
-
-    DocumentResponse,
-    DocumentStatus,
-    DocumentType,
-    DocumentUpdateRequest,
-    DocumentUploadRequest,
-    KYCDocument,
-)
 router = APIRouter()
 
 

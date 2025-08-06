@@ -1,16 +1,16 @@
-from fastapi import FastAPI, Depends, HTTPException, status
+from contextlib import asynccontextmanager
+
+import uvicorn
+from config import settings
+from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer
-from contextlib import asynccontextmanager
-import uvicorn
+from models import (Business, BusinessCompliance, BusinessDocument,
+                    CompanyProfile)
 
-from config import settings
+from api import business, compliance, registration, verification
 from backend.models.database.connection import create_tables
 from backend.services.auth.auth import get_current_user
-from models import Business, CompanyProfile, BusinessDocument, BusinessCompliance
-
-from api import business, registration, verification, compliance
-
 
 # Import API routers
 # Security scheme

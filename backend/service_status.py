@@ -1,9 +1,9 @@
-import requests
-import time
 import json
+import time
 from datetime import datetime
 from typing import Dict, List
 
+import requests
 
 #!/usr/bin/env python3
 """

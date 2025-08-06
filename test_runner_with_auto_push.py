@@ -1,19 +1,15 @@
 import asyncio
+import json
+import logging
+import os
+import sys
 import time
 from datetime import datetime
-from typing import Dict, Any, List
-import logging
+from typing import Any, Dict, List
+
+from dotenv import load_dotenv
 
 from auto_push_system import AutoPushSystem, TestAutoPush
-
-            import sys
-            import os
-            import json
-
-            import os
-            from dotenv import load_dotenv
-
-
 
 #!/usr/bin/env python3
 """

@@ -1,11 +1,10 @@
 import os
-import sys
 import subprocess
+import sys
 import time
 from pathlib import Path
 
 from dotenv import load_dotenv
-
 
 """
 PostgreSQL Setup Script for EHB System

@@ -1,13 +1,11 @@
 import pytest
+from app.main import app
 from fastapi.testclient import TestClient
+from models.database.base import Base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
-
-from app.main import app
 from utils.database.connection import get_db
-from models.database.base import Base
-
 
 # Create in-memory database for testing
 SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
@@ -37,7 +35,6 @@ client = TestClient(app)
 
 
 class TestAuth:
-
     def test_register_user(self):
         """Test user registration"""
         user_data = {

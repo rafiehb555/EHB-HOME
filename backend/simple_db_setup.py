@@ -1,17 +1,16 @@
 import os
 import sys
+
 import psycopg2
+from models.base import Base, SessionLocal, engine
+from models.franchise import Franchise
+from models.service import Service, ServiceStatus, ServiceType
+from models.transaction import Transaction
+from models.user import User
+from models.verification import Verification
+from models.wallet import Wallet
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
-
-from models.base import Base, engine, SessionLocal
-from models.user import User
-from models.service import Service, ServiceType, ServiceStatus
-from models.transaction import Transaction
-from models.wallet import Wallet
-from models.franchise import Franchise
-from models.verification import Verification
-
 
 #!/usr/bin/env python3
 """

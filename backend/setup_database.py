@@ -2,9 +2,8 @@ import os
 import sys
 from pathlib import Path
 
-from models.database.connection import create_tables, init_db, engine
+from models.database.connection import create_tables, engine, init_db
 from sqlalchemy import text
-
 
 #!/usr/bin/env python3
 """

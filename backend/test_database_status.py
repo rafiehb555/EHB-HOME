@@ -1,19 +1,13 @@
-import sys
 import os
+import sys
 from datetime import datetime
 
-        from utils.database.connection import test_connection, engine
-        from sqlalchemy import text
-
-            from utils.database.connection import create_tables
-        from app.main import app
-        from api.v1.auth import router as auth_router
-        from api.v1.services import router as services_router
-        import os
-        from dotenv import load_dotenv
-
-
-
+from api.v1.auth import router as auth_router
+from api.v1.services import router as services_router
+from app.main import app
+from dotenv import load_dotenv
+from sqlalchemy import text
+from utils.database.connection import create_tables, engine, test_connection
 
 #!/usr/bin/env python3
 """

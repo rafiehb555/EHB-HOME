@@ -1,11 +1,8 @@
-import requests
 import json
 from datetime import datetime
 
-        from sqlalchemy import create_engine, text
-
-
-
+import requests
+from sqlalchemy import create_engine, text
 
 #!/usr/bin/env python3
 """

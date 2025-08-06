@@ -11,7 +11,6 @@ from api import marketplace, orders, products, sellers
 from backend.models.database.connection import create_tables
 from backend.services.auth.auth import get_current_user
 
-
 # Import API routers
 # Security scheme
 security = HTTPBearer()

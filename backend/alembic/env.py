@@ -1,16 +1,14 @@
-from logging.config import fileConfig
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-from alembic import context
 import os
 import sys
-from dotenv import load_dotenv
+from logging.config import fileConfig
 
+from alembic import context
+from dotenv import load_dotenv
 from models.database.connection import Base
-from models.database.user import User
 from models.database.service import Service, UserService
 from models.database.transaction import Transaction, Wallet
-
+from models.database.user import User
+from sqlalchemy import engine_from_config, pool
 
 """
 Alembic environment configuration for EHB database migrations

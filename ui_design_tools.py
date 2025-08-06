@@ -1,18 +1,15 @@
+import argparse
+import base64
+import io
+import json
 import os
 import sys
-import base64
-import json
+from typing import Any, Dict, List, Optional
+
 import requests
-from typing import Dict, Any, List, Optional
 from PIL import Image
-import io
 
-from backend.api_integrations import service_manager, Config
-
-    import argparse
-
-
-
+from backend.api_integrations import Config, service_manager
 
 #!/usr/bin/env python3
 """

@@ -1,17 +1,14 @@
 import asyncio
+import json
 import os
+
+import boto3
+import openai
+import sendgrid
+import stripe
+import twilio
 from dotenv import load_dotenv
-
-        import boto3
-        import openai
-        import stripe
-        import sendgrid
-        import twilio
-        from google.cloud import storage
-        from google.cloud import vision
-        import json
-
-
+from google.cloud import storage, vision
 
 #!/usr/bin/env python3
 """

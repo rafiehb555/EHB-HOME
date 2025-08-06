@@ -1,16 +1,15 @@
-from fastapi import FastAPI, Depends, HTTPException, status
+from contextlib import asynccontextmanager
+
+import uvicorn
+from config import settings
+from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer
-from contextlib import asynccontextmanager
-import uvicorn
+from models import Assessment, Course, Progress, Quiz
 
-from config import settings
+from api import assessments, courses, progress, quizzes
 from backend.models.database.connection import create_tables
 from backend.services.auth.auth import get_current_user
-from models import Course, Assessment, Quiz, Progress
-
-from api import courses, assessments, quizzes, progress
-
 
 # Import API routers
 # Security scheme

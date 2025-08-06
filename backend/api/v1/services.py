@@ -1,13 +1,13 @@
-from fastapi import APIRouter, HTTPException, Depends
-from pydantic import BaseModel
-from typing import Dict, List, Optional
-import httpx
 import asyncio
 from datetime import datetime
+from typing import Dict, List, Optional
+
+import httpx
+from fastapi import APIRouter, Depends, HTTPException
+from models.database.user import User
+from pydantic import BaseModel
 
 from services.auth.auth import get_current_user
-from models.database.user import User
-
 
 router = APIRouter(prefix="/services", tags=["services"])
 

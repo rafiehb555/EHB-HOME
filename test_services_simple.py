@@ -1,6 +1,6 @@
-import requests
 import time
 
+import requests
 
 #!/usr/bin/env python3
 """

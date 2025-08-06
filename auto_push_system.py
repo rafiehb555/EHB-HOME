@@ -1,18 +1,17 @@
-import os
-import sys
-import json
-import subprocess
 import asyncio
+import json
+import logging
+import os
+import subprocess
+import sys
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, List, Optional
-import logging
+from typing import Any, Dict, List, Optional
 
-            from quick_test import test_basic_functionality
-            import requests
+import requests
 
-
+from quick_test import test_basic_functionality
 
 #!/usr/bin/env python3
 """

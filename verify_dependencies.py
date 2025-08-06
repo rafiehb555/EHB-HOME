@@ -1,7 +1,6 @@
-import sys
 import importlib
+import sys
 from typing import List, Tuple
-
 
 #!/usr/bin/env python3
 """

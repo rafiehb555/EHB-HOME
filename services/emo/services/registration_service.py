@@ -4,7 +4,8 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from config import settings
-from models.business import Business, BusinessCategory, BusinessStatus, BusinessType
+from models.business import (Business, BusinessCategory, BusinessStatus,
+                             BusinessType)
 from models.company_profile import CompanyProfile, CompanySize, IndustryType
 from sqlalchemy import and_, or_
 from sqlalchemy.orm import Session
@@ -16,9 +17,9 @@ class RegistrationService:
     def __init__(self, db: Session):
         self.db = db
 
-
-
-    def start_registration(self, user_id: int, initial_data: Dict[str, Any]) -> Dict[str, Any]:
+    def start_registration(
+        self, user_id: int, initial_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Start a new business registration process"""
         try:
             # Create initial business record
@@ -28,7 +29,7 @@ class RegistrationService:
                 business_type=initial_data["business_type"],
                 category=initial_data["category"],
                 email=initial_data["email"],
-                status=BusinessStatus.PENDING
+                status=BusinessStatus.PENDING,
             )
 
             self.db.add(business)
@@ -40,13 +41,15 @@ class RegistrationService:
                 "business_id": business.id,
                 "registration_id": str(uuid.uuid4()),
                 "status": "started",
-                "next_steps": ["complete_profile", "upload_documents", "verification"]
+                "next_steps": ["complete_profile", "upload_documents", "verification"],
             }
 
         except Exception as e:
             return {"error": f"Registration failed: {str(e)}"}
 
-    def complete_profile(self, business_id: int, profile_data: Dict[str, Any]) -> Dict[str, Any]:
+    def complete_profile(
+        self, business_id: int, profile_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Complete business profile information"""
         business = self.db.query(Business).filter(Business.id == business_id).first()
         if not business:
@@ -66,13 +69,15 @@ class RegistrationService:
                 "success": True,
                 "business_id": business.id,
                 "status": "profile_completed",
-                "next_steps": ["upload_documents", "verification"]
+                "next_steps": ["upload_documents", "verification"],
             }
 
         except Exception as e:
             return {"error": f"Profile completion failed: {str(e)}"}
 
-    def upload_documents(self, business_id: int, documents: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def upload_documents(
+        self, business_id: int, documents: List[Dict[str, Any]]
+    ) -> Dict[str, Any]:
         """Upload required documents for registration"""
         business = self.db.query(Business).filter(Business.id == business_id).first()
         if not business:
@@ -86,7 +91,7 @@ class RegistrationService:
                     "document_type": doc["type"],
                     "file_name": doc["file_name"],
                     "uploaded_at": datetime.utcnow().isoformat(),
-                    "status": "uploaded"
+                    "status": "uploaded",
                 }
                 uploaded_docs.append(doc_info)
 
@@ -101,7 +106,7 @@ class RegistrationService:
                 "business_id": business.id,
                 "documents_uploaded": len(uploaded_docs),
                 "status": "documents_uploaded",
-                "next_steps": ["verification"]
+                "next_steps": ["verification"],
             }
 
         except Exception as e:
@@ -116,7 +121,9 @@ class RegistrationService:
         try:
             # Check if all required information is complete
             if not self._is_registration_complete(business):
-                return {"error": "Registration incomplete. Please complete all required fields."}
+                return {
+                    "error": "Registration incomplete. Please complete all required fields."
+                }
 
             # Update status to pending verification
             business.status = BusinessStatus.PENDING
@@ -127,7 +134,7 @@ class RegistrationService:
                 "success": True,
                 "business_id": business.id,
                 "status": "submitted_for_verification",
-                "estimated_processing_time": "3-5 business days"
+                "estimated_processing_time": "3-5 business days",
             }
 
         except Exception as e:
@@ -136,8 +143,15 @@ class RegistrationService:
     def _is_registration_complete(self, business: Business) -> bool:
         """Check if business registration is complete"""
         required_fields = [
-            "business_name", "business_type", "category", "email",
-            "address_line1", "city", "state", "postal_code", "country"
+            "business_name",
+            "business_type",
+            "category",
+            "email",
+            "address_line1",
+            "city",
+            "state",
+            "postal_code",
+            "country",
         ]
 
         for field in required_fields:
@@ -145,7 +159,6 @@ class RegistrationService:
                 return False
 
         return True
-
 
     def get_registration_status(self, business_id: int) -> Dict[str, Any]:
         """Get current registration status"""
@@ -158,7 +171,9 @@ class RegistrationService:
             "status": business.status.value,
             "progress": self._calculate_progress(business),
             "next_steps": self._get_next_steps(business),
-            "last_updated": business.updated_at.isoformat() if business.updated_at else None
+            "last_updated": business.updated_at.isoformat()
+            if business.updated_at
+            else None,
         }
 
     def _calculate_progress(self, business: Business) -> int:
@@ -202,7 +217,6 @@ class RegistrationService:
 
         return steps
 
-
     def cancel_registration(self, business_id: int) -> Dict[str, Any]:
         """Cancel business registration"""
         business = self.db.query(Business).filter(Business.id == business_id).first()
@@ -214,11 +228,7 @@ class RegistrationService:
             business.updated_at = datetime.utcnow()
             self.db.commit()
 
-            return {
-                "success": True,
-                "business_id": business.id,
-                "status": "cancelled"
-            }
+            return {"success": True, "business_id": business.id, "status": "cancelled"}
 
         except Exception as e:
             return {"error": f"Cancellation failed: {str(e)}"}

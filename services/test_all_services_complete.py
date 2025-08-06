@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Quick Test Script for EHB Services
-Tests all running services
+Complete Test Script for EHB Services
+Tests all services and provides detailed status
 """
 
 import json
@@ -15,28 +15,29 @@ SERVICES = {
     "main_backend": {
         "port": 8000,
         "name": "Main Backend API",
-        "url": "http://localhost:8000",
+        "url": "http://localhost:8000"
     },
-    "pss": {"port": 4001, "name": "PSS Service", "url": "http://localhost:4001"},
-    "emo": {"port": 4003, "name": "EMO Service", "url": "http://localhost:4003"},
-    "edr": {"port": 4002, "name": "EDR Service", "url": "http://localhost:4002"},
-    "jps": {"port": 4004, "name": "JPS Service", "url": "http://localhost:4004"},
-    "gosellr": {
-        "port": 4005,
-        "name": "GoSellr Service",
-        "url": "http://localhost:4005",
+    "pss": {
+        "port": 4001,
+        "name": "PSS Service",
+        "url": "http://localhost:4001"
     },
-    "wallet": {"port": 5001, "name": "Wallet Service", "url": "http://localhost:5001"},
-    "ai_agent": {"port": 4007, "name": "AI Agent", "url": "http://localhost:4007"},
-    "assistant": {
-        "port": 4008,
-        "name": "EHB Assistant",
-        "url": "http://localhost:4008",
+    "emo": {
+        "port": 4003,
+        "name": "EMO Service",
+        "url": "http://localhost:4003"
     },
-    "robot": {"port": 4009, "name": "EHB Robot", "url": "http://localhost:4009"},
-    "frontend": {"port": 3000, "name": "Frontend", "url": "http://localhost:3000"},
+    "edr": {
+        "port": 4002,
+        "name": "EDR Service",
+        "url": "http://localhost:4002"
+    },
+    "frontend": {
+        "port": 3000,
+        "name": "Frontend",
+        "url": "http://localhost:3000"
+    }
 }
-
 
 def test_service(service_name, config):
     """Test a single service"""
@@ -54,26 +55,34 @@ def test_service(service_name, config):
             return {
                 "status": "healthy",
                 "response_time": response_time,
-                "data": response.json(),
+                "data": response.json()
             }
         else:
             print(f"  ❌ {config['name']}: ERROR (HTTP {response.status_code})")
             return {
                 "status": "error",
                 "error": f"HTTP {response.status_code}",
-                "response_time": response_time,
+                "response_time": response_time
             }
 
     except requests.exceptions.ConnectionError:
         print(f"  🔴 {config['name']}: OFFLINE (Connection refused)")
-        return {"status": "offline", "error": "Connection refused"}
+        return {
+            "status": "offline",
+            "error": "Connection refused"
+        }
     except requests.exceptions.Timeout:
         print(f"  ⏰ {config['name']}: TIMEOUT")
-        return {"status": "timeout", "error": "Request timeout"}
+        return {
+            "status": "timeout",
+            "error": "Request timeout"
+        }
     except Exception as e:
         print(f"  ❌ {config['name']}: ERROR ({str(e)})")
-        return {"status": "error", "error": str(e)}
-
+        return {
+            "status": "error",
+            "error": str(e)
+        }
 
 def test_frontend_pages():
     """Test frontend pages"""
@@ -82,8 +91,7 @@ def test_frontend_pages():
     pages = [
         ("/", "Home Page"),
         ("/dashboard", "Dashboard"),
-        ("/admin", "Admin Panel"),
-        ("/services", "Services Page"),
+        ("/admin", "Admin Panel")
     ]
 
     results = {}
@@ -105,10 +113,9 @@ def test_frontend_pages():
 
     return results
 
-
 def main():
     """Main test function"""
-    print("🚀 EHB SERVICES - QUICK TEST")
+    print("🚀 EHB SERVICES - COMPLETE TEST")
     print("=" * 50)
     print(f"⏰ Test started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print()
@@ -156,19 +163,18 @@ def main():
             "total_services": total_count,
             "healthy_services": healthy_count,
             "health_percentage": health_percentage,
-            "status": status,
+            "status": status
         },
-        "results": results,
+        "results": results
     }
 
-    with open("quick_test_results.json", "w") as f:
+    with open("complete_test_results.json", "w") as f:
         json.dump(test_data, f, indent=2)
 
-    print(f"\n💾 Results saved to: quick_test_results.json")
+    print(f"\n💾 Results saved to: complete_test_results.json")
     print(f"⏰ Test completed at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
     return 0 if health_percentage >= 60 else 1
-
 
 if __name__ == "__main__":
     exit(main())

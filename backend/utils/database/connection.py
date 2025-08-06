@@ -1,18 +1,13 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 import os
 import sys
+
 from dotenv import load_dotenv
-
 from models.database.base import Base
-
-
-        from models.database.user import User
-        from models.database.service import Service
-        from models.database.transaction import Transaction
-
-
-
+from models.database.service import Service
+from models.database.transaction import Transaction
+from models.database.user import User
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
 # Add the backend directory to Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))

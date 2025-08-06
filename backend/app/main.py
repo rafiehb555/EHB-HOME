@@ -6,7 +6,6 @@ import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 """
@@ -33,7 +32,7 @@ mock_services = [
         "is_healthy": True,
         "response_time": 150,
         "error_count": 0,
-        "created_at": "2025-01-01T00:00:00Z"
+        "created_at": "2025-01-01T00:00:00Z",
     },
     {
         "id": "2",
@@ -49,7 +48,7 @@ mock_services = [
         "is_healthy": True,
         "response_time": 120,
         "error_count": 0,
-        "created_at": "2025-01-01T00:00:00Z"
+        "created_at": "2025-01-01T00:00:00Z",
     },
     {
         "id": "3",
@@ -65,8 +64,8 @@ mock_services = [
         "is_healthy": False,
         "response_time": 500,
         "error_count": 5,
-        "created_at": "2025-01-01T00:00:00Z"
-    }
+        "created_at": "2025-01-01T00:00:00Z",
+    },
 ]
 
 # Application state
@@ -79,10 +78,10 @@ app_state = {
         "gosellr": {"status": "ready", "port": 4004, "users": 450},
         "wallet": {"status": "ready", "port": 5001, "users": 320},
         "ai-agent": {"status": "ready", "port": 4007, "users": 89},
-        "ai-robot": {"status": "error", "port": 4008, "users": 12}
+        "ai-robot": {"status": "error", "port": 4008, "users": 12},
     },
     "active_users": 1250,
-    "system_health": "healthy"
+    "system_health": "healthy",
 }
 
 
@@ -115,7 +114,7 @@ app = FastAPI(
     title="EHB Home Page API",
     description="Main API for EHB ecosystem services",
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 # Add CORS middleware
@@ -126,9 +125,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Mount static files
-app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Response models
 class ServiceResponse(BaseModel):
@@ -189,14 +185,14 @@ async def health_check():
         status="healthy",
         timestamp=datetime.utcnow(),
         services=app_state["services"],
-        database="connected"
+        database="connected",
     )
 
 
 @app.get("/api/services", response_model=List[ServiceResponse])
 async def get_services_endpoint(
     category: Optional[str] = Query(None, description="Filter by service category"),
-    status: Optional[str] = Query(None, description="Filter by service status")
+    status: Optional[str] = Query(None, description="Filter by service status"),
 ):
     """Get all services with optional filtering"""
     services = mock_services.copy()
@@ -223,20 +219,18 @@ async def get_service_endpoint(service_id: str):
 async def get_featured_services_endpoint():
     """Get featured services"""
     featured_services = [
-        s for s in mock_services
-        if s["status"] == "active" and s["is_healthy"]
+        s for s in mock_services if s["status"] == "active" and s["is_healthy"]
     ]
     return featured_services[:3]  # Return top 3 featured services
 
 
 @app.get("/api/search", response_model=SearchResponse)
-async def search_endpoint(
-    q: str = Query(..., description="Search query")
-):
+async def search_endpoint(q: str = Query(..., description="Search query")):
     """Search services and users"""
     # Mock search implementation
     matching_services = [
-        s for s in mock_services
+        s
+        for s in mock_services
         if q.lower() in s["name"].lower() or q.lower() in s["description"].lower()
     ]
 
@@ -254,21 +248,21 @@ async def search_endpoint(
             is_verified=True,
             is_admin=False,
             verification_progress=100,
-            created_at="2025-01-01T00:00:00Z"
+            created_at="2025-01-01T00:00:00Z",
         )
     ]
 
     return SearchResponse(
         services=matching_services,
         users=mock_users,
-        total_results=len(matching_services) + len(mock_users)
+        total_results=len(matching_services) + len(mock_users),
     )
 
 
 @app.get("/api/users", response_model=List[UserResponse])
 async def get_users_endpoint(
     sql_level: Optional[str] = Query(None, description="Filter by SQL level"),
-    status: Optional[str] = Query(None, description="Filter by user status")
+    status: Optional[str] = Query(None, description="Filter by user status"),
 ):
     """Get all users with optional filtering"""
     # Mock users data
@@ -285,7 +279,7 @@ async def get_users_endpoint(
             is_verified=True,
             is_admin=False,
             verification_progress=100,
-            created_at="2025-01-01T00:00:00Z"
+            created_at="2025-01-01T00:00:00Z",
         )
     ]
     return mock_users
@@ -307,7 +301,7 @@ async def get_user_endpoint(user_id: str):
         is_verified=True,
         is_admin=False,
         verification_progress=100,
-        created_at="2025-01-01T00:00:00Z"
+        created_at="2025-01-01T00:00:00Z",
     )
 
 
@@ -317,8 +311,10 @@ async def get_overview_stats():
     return {
         "total_users": app_state["active_users"],
         "total_services": len(app_state["services"]),
-        "active_services": len([s for s in app_state["services"].values() if s["status"] == "ready"]),
-        "system_health": app_state["system_health"]
+        "active_services": len(
+            [s for s in app_state["services"].values() if s["status"] == "ready"]
+        ),
+        "system_health": app_state["system_health"],
     }
 
 
@@ -328,7 +324,9 @@ async def get_services_dashboard():
     return {
         "services": app_state["services"],
         "total_services": len(app_state["services"]),
-        "healthy_services": len([s for s in app_state["services"].values() if s["status"] == "ready"])
+        "healthy_services": len(
+            [s for s in app_state["services"].values() if s["status"] == "ready"]
+        ),
     }
 
 
@@ -340,7 +338,7 @@ async def root():
         "version": "1.0.0",
         "status": "running",
         "services": len(app_state["services"]),
-        "active_users": app_state["active_users"]
+        "active_users": app_state["active_users"],
     }
 
 
@@ -357,9 +355,9 @@ async def api_info():
             "users": "/api/users",
             "search": "/api/search",
             "stats": "/api/stats/overview",
-            "dashboard": "/api/dashboard/services"
+            "dashboard": "/api/dashboard/services",
         },
-        "documentation": "/docs"
+        "documentation": "/docs",
     }
 
 
@@ -374,7 +372,7 @@ async def get_sql_level_endpoint(user_id: str):
         "sql_rank": "gold",
         "progress": 85,
         "next_level": "master",
-        "points_needed": 200
+        "points_needed": 200,
     }
 
 
@@ -392,19 +390,23 @@ async def get_dashboard_data():
             "total_users": app_state["active_users"],
             "active_users": 890,
             "new_users_today": 45,
-            "verified_users": 1200
+            "verified_users": 1200,
         },
         "service_stats": {
             "total_services": len(app_state["services"]),
-            "active_services": len([s for s in app_state["services"].values() if s["status"] == "ready"]),
-            "services_with_errors": len([s for s in app_state["services"].values() if s["status"] == "error"])
+            "active_services": len(
+                [s for s in app_state["services"].values() if s["status"] == "ready"]
+            ),
+            "services_with_errors": len(
+                [s for s in app_state["services"].values() if s["status"] == "error"]
+            ),
         },
         "system_stats": {
             "uptime": "99.9%",
             "response_time": "150ms",
             "error_rate": "0.1%",
-            "last_backup": "2025-01-01T00:00:00Z"
-        }
+            "last_backup": "2025-01-01T00:00:00Z",
+        },
     }
 
 

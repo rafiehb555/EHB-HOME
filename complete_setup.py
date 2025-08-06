@@ -1,6 +1,5 @@
 import subprocess
 
-
 #!/usr/bin/env python3
 """
 Complete EHB System Setup Script
